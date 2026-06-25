@@ -6,6 +6,13 @@ gem "rails", "~> 8.1.3"
 gem "propshaft"
 # Use PostgreSQL as the database for Active Record [https://guides.rubyonrails.org/active_record_basics.html#specifying-the-database]
 gem "pg", "~> 1.5"
+
+# Background job processing
+gem "sidekiq", "~> 8.0"
+
+# Redis for caching and Sidekiq backend
+gem "redis", "~> 5.3"
+
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
