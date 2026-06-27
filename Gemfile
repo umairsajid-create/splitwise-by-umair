@@ -65,6 +65,21 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # RSpec testing framework (replaces default minitest)
+  gem "rspec-rails", "~> 7.1"
+
+  # Test data factories (create test objects easily)
+  gem "factory_bot_rails", "~> 6.4"
+
+  # Fake data generator (names, emails, etc.)
+  gem "faker", "~> 3.5"
+
+  # One-liner tests for validations and associations
+  gem "shoulda-matchers", "~> 6.4"
+
+  # Database cleaner for test isolation
+  gem "database_cleaner-active_record", "~> 2.2"
 end
 
 group :development do
