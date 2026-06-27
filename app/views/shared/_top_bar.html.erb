@@ -1,9 +1,5 @@
-<%# Top bar — used on inner pages (group detail, expense form, etc.)
-    Usage in views:
-      <% content_for :top_bar do %>
-        <%= render "shared/top_bar", title: "Group Name", back_path: groups_path %>
-      <% end %>
-%>
+<%# Top bar partial — used on inner pages (group detail, expense form, etc.) %>
+<%# Usage: content_for(:top_bar) { render "shared/top_bar", title: "Name", back_path: groups_path } %>
 
 <header class="top-bar">
   <%# Back button (optional) %>

@@ -1,0 +1,29 @@
+<%# Devise shared navigation links — shown at bottom of auth forms %>
+<%# This file is included by Devise automatically %>
+
+<div style="text-align:center; margin-top: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary);">
+  <%- if controller_name != 'sessions' %>
+    <%= link_to "Sign in", new_session_path(resource_name),
+          style: "font-weight:700; color:var(--color-primary);" %><br/>
+  <% end %>
+
+  <%- if devise_mapping.registerable? && controller_name != 'registrations' %>
+    <%= link_to "Create account", new_registration_path(resource_name),
+          style: "font-weight:700; color:var(--color-primary);" %><br/>
+  <% end %>
+
+  <%- if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
+    <%= link_to "Forgot password?", new_password_path(resource_name),
+          style: "font-weight:700; color:var(--color-primary);" %><br/>
+  <% end %>
+
+  <%- if devise_mapping.confirmable? && controller_name != 'confirmations' %>
+    <%= link_to "Resend confirmation", new_confirmation_path(resource_name),
+          style: "color:var(--text-secondary);" %><br/>
+  <% end %>
+
+  <%- if devise_mapping.lockable? && resource_class.unlock_strategy_enabled?(:email) && controller_name != 'unlocks' %>
+    <%= link_to "Resend unlock instructions", new_unlock_path(resource_name),
+          style: "color:var(--text-secondary);" %><br/>
+  <% end %>
+</div>

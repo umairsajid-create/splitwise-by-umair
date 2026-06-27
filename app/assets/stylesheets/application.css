@@ -127,7 +127,7 @@ ul, ol {
 }
 
 /* ============================================================
-   4. LAYOUT — App Container
+   4. LAYOUT — App Grid
    ============================================================ */
 
 /* The full-screen app wrapper */
@@ -138,27 +138,46 @@ ul, ol {
   background: var(--bg-app);
 }
 
-/* Centered mobile-width container */
-.app-container {
+/* Base mobile layout (stacked) */
+.app-layout {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  background: var(--bg-app);
   min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Sidebar hidden on mobile */
+.sidebar {
+  display: none;
 }
 
 /* Main scrollable content area — accounts for top bar + bottom nav */
 .page-content {
   padding: var(--top-bar-height) var(--page-padding) 0;
   padding-bottom: calc(var(--nav-height) + var(--page-padding));
-  min-height: 100vh;
+  flex: 1;
 }
 
 /* Content without top bar (auth pages) */
 .page-content--bare {
   padding: var(--page-padding);
   padding-bottom: var(--page-padding);
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 /* ============================================================
@@ -167,17 +186,15 @@ ul, ol {
 .top-bar {
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 100%;
-  max-width: var(--max-width);
   height: var(--top-bar-height);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   padding: 0 var(--page-padding);
-  z-index: 100;
+  z-index: 90;
   gap: var(--space-sm);
 }
 
@@ -204,6 +221,7 @@ ul, ol {
   font-weight: 700;
   color: var(--text-primary);
   flex: 1;
+  text-align: center;
 }
 
 .top-bar__action {
@@ -216,6 +234,8 @@ ul, ol {
   font-size: var(--font-size-sm);
   border-radius: var(--border-radius-sm);
   transition: background var(--transition-fast);
+  position: absolute;
+  right: var(--page-padding);
 }
 
 .top-bar__action:hover {
@@ -229,10 +249,8 @@ ul, ol {
 .bottom-nav {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 100%;
-  max-width: var(--max-width);
   height: var(--nav-height);
   background: var(--bg-surface);
   border-top: 1px solid var(--border-color);
@@ -240,7 +258,7 @@ ul, ol {
   align-items: center;
   justify-content: space-around;
   z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom); /* iPhone notch safe area */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .bottom-nav__item {
@@ -273,7 +291,6 @@ ul, ol {
   stroke-width: 1.8;
 }
 
-/* Center FAB button */
 .bottom-nav__fab {
   display: flex;
   align-items: center;
@@ -304,7 +321,101 @@ ul, ol {
 }
 
 /* ============================================================
-   7. CARDS
+   7. DESKTOP SIDEBAR 
+   ============================================================ */
+.sidebar {
+  display: none;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  margin-bottom: var(--space-lg);
+}
+
+.sidebar__logo {
+  width: 32px;
+  height: 32px;
+  background: var(--color-primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.sidebar__logo svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar__title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 var(--space-md);
+  flex: 1;
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px var(--space-md);
+  border-radius: var(--border-radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.sidebar__item:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.sidebar__item.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.sidebar__item svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+.sidebar__badge {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-negative);
+  color: white;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+}
+
+.sidebar__footer {
+  padding: var(--space-xl) var(--space-md);
+}
+
+/* ============================================================
+   8. CARDS
    ============================================================ */
 .card {
   background: var(--bg-surface);
@@ -774,19 +885,22 @@ textarea.form-control {
    14. FLASH MESSAGES / TOASTS
    ============================================================ */
 .flash-container {
-  position: fixed;
+  position: absolute;
   top: calc(var(--top-bar-height) + var(--space-sm));
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - var(--space-lg));
-  max-width: calc(var(--max-width) - var(--space-lg));
+  left: var(--space-md);
+  right: var(--space-md);
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-xs);
+  pointer-events: none;
 }
 
 .flash {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 600px;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -1004,6 +1118,24 @@ textarea.form-control {
   color: var(--color-primary);
 }
 
+/* Wizard Progress Bar */
+.wizard-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-surface-2);
+  border-radius: var(--border-radius-full);
+  margin-bottom: var(--space-lg);
+  overflow: hidden;
+}
+
+.wizard-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  width: 50%; /* Set by JS */
+  transition: width 0.3s ease;
+  border-radius: var(--border-radius-full);
+}
+
 /* ============================================================
    19. SECTION HEADERS
    ============================================================ */
@@ -1122,15 +1254,47 @@ textarea.form-control {
 /* ============================================================
    24. DESKTOP ADJUSTMENTS
    ============================================================ */
-@media (min-width: 480px) {
-  .app-container {
-    box-shadow: var(--shadow-lg);
+@media (min-width: 768px) {
+  :root {
+    --sidebar-width: 260px;
+    --page-padding: 32px;
   }
 
-  /* App looks like a phone centered on desktop */
-  body {
-    background: #E8E8E8;
+  /* Grid Layout */
+  .app-layout {
+    flex-direction: row;
+  }
+
+  .sidebar {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    width: var(--sidebar-width);
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+
+  .app-main {
+    flex: 1;
+    min-width: 0; /* Prevent flex overflow */
+  }
+
+  /* Hide bottom nav on desktop */
+  .bottom-nav {
+    display: none;
+  }
+
+  /* Adjust page content to remove bottom nav padding */
+  .page-content {
+    padding-bottom: var(--page-padding);
+  }
+
+  /* Adjust top bar to only cover main area */
+  .top-bar {
+    left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
   }
 }

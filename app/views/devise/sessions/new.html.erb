@@ -1,0 +1,79 @@
+<%# ====================================================
+    LOGIN PAGE
+    Route: GET /users/sign_in
+    ==================================================== %>
+
+<%# No top bar on auth pages — bare layout applied via ApplicationController %>
+<% content_for :title, "Sign In — Splitwise" %>
+
+<div class="auth-page">
+
+  <%# Logo + Branding %>
+  <div class="auth-logo">
+    <div class="auth-logo__icon">
+      <%# Splitwise-style "S" icon — money split symbol %>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    </div>
+    <div class="auth-logo__name">Splitwise</div>
+    <div class="auth-logo__tagline">Split bills, not friendships</div>
+  </div>
+
+  <%# Login Card %>
+  <div class="auth-card animate-slide-up">
+    <h2 class="auth-card__title">Welcome back</h2>
+    <p class="auth-card__subtitle">Sign in to your account</p>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+
+      <%# Email %>
+      <div class="form-group">
+        <%= f.label :email, "Email address", class: "form-label" %>
+        <%= f.email_field :email,
+              autofocus: true,
+              autocomplete: "email",
+              class: "form-control #{'form-control--error' if resource.errors[:email].any?}",
+              placeholder: "you@example.com" %>
+        <% if resource.errors[:email].any? %>
+          <span class="form-error"><%= resource.errors[:email].first %></span>
+        <% end %>
+      </div>
+
+      <%# Password %>
+      <div class="form-group">
+        <div class="d-flex justify-between align-center mb-xs">
+          <%= f.label :password, "Password", class: "form-label", style: "margin-bottom:0" %>
+          <%= link_to "Forgot password?", new_user_password_path,
+                style: "font-size:12px; font-weight:700; color:var(--color-primary);" %>
+        </div>
+        <%= f.password_field :password,
+              autocomplete: "current-password",
+              class: "form-control #{'form-control--error' if resource.errors[:password].any?}",
+              placeholder: "Your password" %>
+        <% if resource.errors[:password].any? %>
+          <span class="form-error"><%= resource.errors[:password].first %></span>
+        <% end %>
+      </div>
+
+      <%# Remember me %>
+      <div class="form-group d-flex align-center gap-sm" style="margin-bottom: var(--space-lg);">
+        <%= f.check_box :remember_me, id: "remember_me" %>
+        <%= f.label :remember_me, "Keep me signed in",
+              style: "margin:0; font-size:var(--font-size-sm); color:var(--text-secondary); cursor:pointer;" %>
+      </div>
+
+      <%# Submit %>
+      <%= f.submit "Sign In", class: "btn btn--primary btn--block btn--lg" %>
+
+    <% end %>
+  </div>
+
+  <%# Footer links %>
+  <div class="auth-footer">
+    Don't have an account?
+    <%= link_to "Create one →", new_user_registration_path %>
+  </div>
+
+</div>

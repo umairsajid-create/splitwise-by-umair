@@ -26,10 +26,8 @@
     <span>Groups</span>
   <% end %>
 
-  <%# 3. FAB — Add Expense (center button) %>
-  <%# Links to first group if user has one, otherwise groups page %>
-  <% fab_path = current_user.groups.any? ? new_group_expense_path(current_user.groups.first) : groups_path %>
-  <%= link_to fab_path,
+  <%# 3. FAB — Add Expense (links to groups until expense form is built in Branch 5) %>
+  <%= link_to groups_path,
         class: "bottom-nav__fab",
         "aria-label": "Add expense",
         "data-turbo-frame": "_top" do %>

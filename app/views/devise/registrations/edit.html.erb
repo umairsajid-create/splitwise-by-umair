@@ -1,0 +1,128 @@
+<%# ====================================================
+    EDIT PROFILE / CHANGE PASSWORD PAGE
+    Route: GET /users/edit  (Devise registrations#edit)
+    ==================================================== %>
+
+<% content_for :title, "Edit Account — Splitwise" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar",
+        title: "Edit Account",
+        back_path: profile_path %>
+<% end %>
+
+<div class="animate-fade-in">
+
+  <%= form_for(resource, as: resource_name,
+        url: registration_path(resource_name),
+        html: { method: :put }) do |f| %>
+
+    <%# Validation errors %>
+    <% if resource.errors.any? %>
+      <div style="background:var(--color-negative);color:white;padding:var(--space-sm) var(--space-md);border-radius:var(--border-radius-sm);margin-bottom:var(--space-md);font-size:var(--font-size-sm);">
+        <% resource.errors.full_messages.each do |msg| %>
+          <div>• <%= msg %></div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# ── PROFILE INFO ── %>
+    <div class="card card--shadow mb-md">
+      <div class="card__header">
+        <span class="section-title">Profile Info</span>
+      </div>
+      <div class="card__body">
+
+        <div class="form-group">
+          <%= f.label :username, "Username", class: "form-label" %>
+          <%= f.text_field :username, class: "form-control", minlength: 3, maxlength: 30 %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :email, "Email address", class: "form-label" %>
+          <%= f.email_field :email, class: "form-control", autocomplete: "email" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :phone_number, "Phone number", class: "form-label" %>
+          <%= f.telephone_field :phone_number, class: "form-control", placeholder: "+92 300 0000000" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :default_currency, "Default currency", class: "form-label" %>
+          <%= f.select :default_currency,
+                [["🇵🇰 PKR — Pakistani Rupee", "PKR"],
+                 ["🇺🇸 USD — US Dollar", "USD"],
+                 ["🇬🇧 GBP — British Pound", "GBP"],
+                 ["🇪🇺 EUR — Euro", "EUR"],
+                 ["🇦🇪 AED — UAE Dirham", "AED"],
+                 ["🇸🇦 SAR — Saudi Riyal", "SAR"]],
+                {},
+                class: "form-control" %>
+        </div>
+
+      </div>
+    </div>
+
+    <%# ── CHANGE PASSWORD ── %>
+    <div class="card card--shadow mb-md">
+      <div class="card__header">
+        <span class="section-title">Change Password</span>
+      </div>
+      <div class="card__body">
+        <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-md);">
+          Leave blank if you don't want to change your password
+        </p>
+
+        <div class="form-group">
+          <%= f.label :password, "New password", class: "form-label" %>
+          <%= f.password_field :password,
+                autocomplete: "new-password",
+                class: "form-control",
+                placeholder: "Leave blank to keep current" %>
+          <% if @minimum_password_length %>
+            <span class="form-hint">Minimum <%= @minimum_password_length %> characters</span>
+          <% end %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :password_confirmation, "Confirm new password", class: "form-label" %>
+          <%= f.password_field :password_confirmation,
+                autocomplete: "new-password",
+                class: "form-control",
+                placeholder: "Same new password again" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :current_password, "Current password", class: "form-label" %>
+          <%= f.password_field :current_password,
+                autocomplete: "current-password",
+                class: "form-control",
+                placeholder: "Required to save changes" %>
+          <span class="form-hint">Required to confirm any changes above</span>
+        </div>
+
+      </div>
+    </div>
+
+    <%# Save button %>
+    <%= f.submit "Save Changes", class: "btn btn--primary btn--block btn--lg" %>
+
+  <% end %>
+
+  <%# Danger zone — delete account %>
+  <div class="card card--shadow mt-lg" style="border: 1px solid rgba(255,101,47,0.2);">
+    <div class="card__body text-center">
+      <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-md);">
+        Permanently delete your account and all your data.
+      </p>
+      <%= button_to "Delete My Account",
+            registration_path(resource_name),
+            method: :delete,
+            data: { turbo_confirm: "Are you sure? This cannot be undone!" },
+            class: "btn btn--danger btn--sm" %>
+    </div>
+  </div>
+
+  <div class="spacer--lg"></div>
+</div>

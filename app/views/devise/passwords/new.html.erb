@@ -1,0 +1,54 @@
+<%# ====================================================
+    FORGOT PASSWORD PAGE
+    Route: GET /users/password/new
+    ==================================================== %>
+
+<% content_for :title, "Forgot Password — Splitwise" %>
+
+<div class="auth-page">
+
+  <%# Logo %>
+  <div class="auth-logo">
+    <div class="auth-logo__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    </div>
+    <div class="auth-logo__name">Splitwise</div>
+  </div>
+
+  <div class="auth-card animate-slide-up">
+    <%# Lock icon above title %>
+    <div style="text-align:center; margin-bottom:var(--space-md);">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+
+    <h2 class="auth-card__title text-center">Forgot password?</h2>
+    <p class="auth-card__subtitle text-center">Enter your email and we'll send you a reset link</p>
+
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+
+      <div class="form-group" style="margin-bottom: var(--space-lg);">
+        <%= f.label :email, "Email address", class: "form-label" %>
+        <%= f.email_field :email,
+              autofocus: true,
+              autocomplete: "email",
+              class: "form-control",
+              placeholder: "you@example.com" %>
+      </div>
+
+      <%= f.submit "Send Reset Link", class: "btn btn--primary btn--block btn--lg" %>
+
+    <% end %>
+  </div>
+
+  <div class="auth-footer">
+    Remember it now?
+    <%= link_to "Sign in →", new_user_session_path %>
+  </div>
+
+</div>

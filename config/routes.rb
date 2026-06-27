@@ -3,22 +3,45 @@
 require "sidekiq/web"
 
 Rails.application.routes.draw do
-  # Devise authentication routes
+  # ─────────────────────────────────────────
+  # Authentication (Devise)
+  # ─────────────────────────────────────────
   devise_for :users
 
-  # Sidekiq Web UI (admin only — we'll add auth later)
+  # ─────────────────────────────────────────
+  # Dashboard (root)
+  # ─────────────────────────────────────────
+  root "dashboard#index"
+
+  # ─────────────────────────────────────────
+  # Groups (stub — full implementation in Branch 4)
+  # ─────────────────────────────────────────
+  resources :groups do
+    resources :expenses, except: [ :index ]
+    resources :settlements, only: [ :new, :create ]
+    resources :invitations, only: [ :new, :create ]
+    resources :group_members, only: [ :destroy ]
+  end
+
+  # ─────────────────────────────────────────
+  # Activity feed stub (nav links to this)
+  # ─────────────────────────────────────────
+  get "activity", to: "activity#index", as: :activity
+
+  # ─────────────────────────────────────────
+  # Profile stub (nav links to this)
+  # ─────────────────────────────────────────
+  resource :profile, only: [ :show, :edit, :update ]
+
+  # ─────────────────────────────────────────
+  # Sidekiq Web UI
+  # ─────────────────────────────────────────
   mount Sidekiq::Web, at: "/sidekiq"
 
-  # Health check endpoint (required for deployment)
+  # ─────────────────────────────────────────
+  # System routes
+  # ─────────────────────────────────────────
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # PWA files
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-
-
-
-  # Root route (we'll change this later)
-  # root "home#index"
-  root "rails/welcome#index"
 end

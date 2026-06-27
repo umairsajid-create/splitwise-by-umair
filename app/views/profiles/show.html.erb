@@ -1,0 +1,93 @@
+<%# Profile page %>
+
+<% content_for :title, "#{@user.username} — Splitwise" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar",
+        title: "Account",
+        action_label: "Edit",
+        action_path: edit_profile_path %>
+<% end %>
+
+<div class="animate-fade-in">
+
+  <%# Profile header card %>
+  <div class="card card--shadow mb-md">
+    <div class="card__body" style="display:flex; align-items:center; gap:var(--space-md);">
+      <div class="avatar avatar--xl">
+        <% if @user.avatar.attached? %>
+          <%= image_tag @user.avatar, alt: @user.username %>
+        <% else %>
+          <%= @user.username.first.upcase %>
+        <% end %>
+      </div>
+      <div>
+        <div class="font-heading fw-bold" style="font-size:var(--font-size-lg);"><%= @user.username %></div>
+        <div class="text-secondary text-sm"><%= @user.email %></div>
+        <% if @user.phone_number.present? %>
+          <div class="text-secondary text-sm"><%= @user.phone_number %></div>
+        <% end %>
+        <div class="mt-xs">
+          <span class="badge badge--<%= @user.role == 'admin' ? 'negative' : (@user.role == 'premium' ? 'primary' : 'neutral') %>">
+            <%= @user.role.capitalize %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Stats row %>
+  <div class="card card--shadow mb-md">
+    <div class="card__body" style="display:flex; justify-content:space-around; text-align:center;">
+      <div>
+        <div class="font-heading fw-bold" style="font-size:var(--font-size-xl);color:var(--color-primary);"><%= @user.groups.count %></div>
+        <div class="text-secondary text-sm">Groups</div>
+      </div>
+      <div style="width:1px;background:var(--border-color);"></div>
+      <div>
+        <div class="font-heading fw-bold" style="font-size:var(--font-size-xl);"><%= @user.created_expenses.count %></div>
+        <div class="text-secondary text-sm">Expenses</div>
+      </div>
+      <div style="width:1px;background:var(--border-color);"></div>
+      <div>
+        <div class="font-heading fw-bold" style="font-size:var(--font-size-xl);color:<%= @user.balance_cents >= 0 ? 'var(--color-positive)' : 'var(--color-negative)' %>;">
+          <%= @user.default_currency %>
+        </div>
+        <div class="text-secondary text-sm">Currency</div>
+      </div>
+    </div>
+  </div>
+
+  <%# Account actions %>
+  <div class="card card--shadow mb-md">
+    <div class="card__header"><span class="section-title">Account</span></div>
+    <%= link_to edit_profile_path, class: "list-item" do %>
+      <div class="list-item__icon">✏️</div>
+      <div class="list-item__body">
+        <div class="list-item__title">Edit Profile</div>
+        <div class="list-item__subtitle">Update username, email, password</div>
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    <% end %>
+    <%= link_to edit_user_registration_path, class: "list-item" do %>
+      <div class="list-item__icon">🔒</div>
+      <div class="list-item__body">
+        <div class="list-item__title">Change Password</div>
+        <div class="list-item__subtitle">Update your login password</div>
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    <% end %>
+  </div>
+
+  <%# Sign out %>
+  <div class="card card--shadow">
+    <div class="card__body">
+      <%= button_to "Sign Out",
+            destroy_user_session_path,
+            method: :delete,
+            class: "btn btn--outline btn--block" %>
+    </div>
+  </div>
+
+  <div class="spacer--lg"></div>
+</div>

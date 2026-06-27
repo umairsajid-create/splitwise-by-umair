@@ -1,0 +1,193 @@
+<%# ====================================================
+    REGISTER PAGE
+    Route: GET /users/sign_up
+    ==================================================== %>
+
+<% content_for :title, "Create Account — Splitwise" %>
+
+<div class="auth-page">
+
+  <%# Logo %>
+  <div class="auth-logo">
+    <div class="auth-logo__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    </div>
+    <div class="auth-logo__name">Splitwise</div>
+    <div class="auth-logo__tagline">Split bills, not friendships</div>
+  </div>
+
+  <%# Register Card %>
+  <div class="auth-card animate-slide-up">
+    <h2 class="auth-card__title">Create account</h2>
+    <p class="auth-card__subtitle mb-sm">Join Splitwise and start splitting</p>
+
+    <%# Progress Bar %>
+    <div class="wizard-progress-bar">
+      <div id="wizard-progress" class="wizard-progress-fill" style="width: 50%;"></div>
+    </div>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+
+      <%# Show all validation errors at top %>
+      <% if resource.errors.any? %>
+        <div style="background:var(--color-negative);color:white;padding:var(--space-sm) var(--space-md);border-radius:var(--border-radius-sm);margin-bottom:var(--space-md);font-size:var(--font-size-sm);">
+          <% resource.errors.full_messages.each do |msg| %>
+            <div>• <%= msg %></div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# STEP 1: Basic Info %>
+      <div class="wizard-step animate-fade-in" id="step-1">
+        <%# Username %>
+        <div class="form-group">
+          <%= f.label :username, "Username", class: "form-label" %>
+          <%= f.text_field :username,
+                autocomplete: "username",
+                class: "form-control",
+                placeholder: "e.g. umair_splits",
+                required: true,
+                minlength: 3,
+                maxlength: 30 %>
+        </div>
+
+        <%# Email %>
+        <div class="form-group">
+          <%= f.label :email, "Email address", class: "form-label" %>
+          <%= f.email_field :email,
+                autocomplete: "email",
+                class: "form-control",
+                required: true,
+                placeholder: "you@example.com" %>
+        </div>
+
+        <%# Phone (optional) %>
+        <div class="form-group">
+          <%= f.label :phone_number, "Phone number", class: "form-label" %>
+          <%= f.telephone_field :phone_number,
+                autocomplete: "tel",
+                class: "form-control",
+                placeholder: "+92 300 0000000" %>
+        </div>
+      </div>
+
+      <%# STEP 2: Security & Currency %>
+      <div class="wizard-step animate-fade-in" id="step-2" style="display: none;">
+        <%# Default Currency %>
+        <div class="form-group">
+          <%= f.label :default_currency, "Default currency", class: "form-label" %>
+          <%= f.select :default_currency,
+                [["🇵🇰 PKR — Pakistani Rupee", "PKR"],
+                 ["🇺🇸 USD — US Dollar", "USD"],
+                 ["🇬🇧 GBP — British Pound", "GBP"],
+                 ["🇪🇺 EUR — Euro", "EUR"],
+                 ["🇦🇪 AED — UAE Dirham", "AED"],
+                 ["🇸🇦 SAR — Saudi Riyal", "SAR"]],
+                { selected: "PKR" },
+                class: "form-control" %>
+        </div>
+
+        <%# Password %>
+        <div class="form-group">
+          <%= f.label :password, "Password", class: "form-label" %>
+          <%= f.password_field :password,
+                autocomplete: "new-password",
+                class: "form-control",
+                required: true,
+                placeholder: "At least 6 characters",
+                minlength: 6 %>
+        </div>
+
+        <%# Confirm Password %>
+        <div class="form-group" style="margin-bottom: var(--space-lg);">
+          <%= f.label :password_confirmation, "Confirm password", class: "form-label" %>
+          <%= f.password_field :password_confirmation,
+                autocomplete: "new-password",
+                class: "form-control",
+                required: true,
+                placeholder: "Same password again" %>
+        </div>
+      </div>
+
+      <%# Navigation Buttons %>
+      <div class="d-flex gap-sm mt-md">
+        <button type="button" id="wizard-btn-back" class="btn btn--outline flex-1" style="display: none;">
+          Back
+        </button>
+        <button type="button" id="wizard-btn-next" class="btn btn--primary flex-1">
+          Next Step
+        </button>
+        <%= f.submit "Create Account", id: "wizard-btn-submit", class: "btn btn--primary flex-1", style: "display: none;" %>
+      </div>
+
+    <% end %>
+  </div>
+
+  <%# Footer links %>
+  <div class="auth-footer">
+    Already have an account?
+    <%= link_to "Sign in →", new_user_session_path %>
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    const initWizard = function() {
+      const step1 = document.getElementById("step-1");
+      const step2 = document.getElementById("step-2");
+      const btnNext = document.getElementById("wizard-btn-next");
+      const btnBack = document.getElementById("wizard-btn-back");
+      const btnSubmit = document.getElementById("wizard-btn-submit");
+      const progress = document.getElementById("wizard-progress");
+
+      if (!btnNext || btnNext.dataset.initialized) return;
+      btnNext.dataset.initialized = "true"; // Prevent duplicate listeners
+
+      btnNext.addEventListener("click", function(e) {
+        e.preventDefault();
+        
+        // Check HTML5 Validation on Step 1 fields
+        const inputs = step1.querySelectorAll("input");
+        let allValid = true;
+        for (let input of inputs) {
+          if (!input.checkValidity()) {
+            input.reportValidity(); // Show browser error popup
+            allValid = false;
+            break;
+          }
+        }
+
+        if (!allValid) return; // Block moving to step 2
+
+        step1.style.display = "none";
+        step2.style.display = "block";
+        
+        btnNext.style.display = "none";
+        btnBack.style.display = "block";
+        btnSubmit.style.display = "block";
+        
+        progress.style.width = "100%";
+      });
+
+      btnBack.addEventListener("click", function(e) {
+        e.preventDefault();
+        step2.style.display = "none";
+        step1.style.display = "block";
+        
+        btnBack.style.display = "none";
+        btnSubmit.style.display = "none";
+        btnNext.style.display = "block";
+        
+        progress.style.width = "50%";
+      });
+    };
+
+    // Run immediately, and also on Turbo loads
+    initWizard();
+    document.addEventListener("turbo:load", initWizard);
+  })();
+</script>

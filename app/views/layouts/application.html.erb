@@ -23,22 +23,33 @@
 
   <body>
     <div class="app-wrapper">
-      <div class="app-container">
-
-        <%# Flash messages (toasts) — shown on every page %>
-        <%= render "shared/flash_messages" %>
-
-        <%# Top bar — only shown on inner pages (not auth pages) %>
-        <% if user_signed_in? && content_for?(:top_bar) %>
-          <%= yield :top_bar %>
+      <%# App Layout is a CSS Grid on desktop (sidebar + main), or stacked on mobile %>
+      <div class="app-layout">
+        
+        <%# Desktop Sidebar — Hidden on mobile %>
+        <% if user_signed_in? %>
+          <%= render "shared/sidebar" %>
         <% end %>
 
-        <%# Main page content %>
-        <main class="<%= user_signed_in? ? 'page-content' : 'page-content--bare' %>">
-          <%= yield %>
-        </main>
+        <%# Main Area containing top bar, flash messages, and content %>
+        <div class="app-main">
+          <%# Flash messages (toasts) %>
+          <%= render "shared/flash_messages" %>
 
-        <%# Bottom navigation — only shown when logged in %>
+          <%# Top bar (mobile + desktop) %>
+          <% if user_signed_in? && content_for?(:top_bar) %>
+            <%= yield :top_bar %>
+          <% end %>
+
+          <%# Main page content %>
+          <main class="<%= user_signed_in? ? 'page-content' : 'page-content--bare' %>">
+            <div class="content-container">
+              <%= yield %>
+            </div>
+          </main>
+        </div>
+
+        <%# Bottom navigation — Hidden on desktop %>
         <% if user_signed_in? %>
           <%= render "shared/bottom_nav" %>
         <% end %>
