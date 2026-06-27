@@ -1,0 +1,27 @@
+<%# Top bar — used on inner pages (group detail, expense form, etc.)
+    Usage in views:
+      <% content_for :top_bar do %>
+        <%= render "shared/top_bar", title: "Group Name", back_path: groups_path %>
+      <% end %>
+%>
+
+<header class="top-bar">
+  <%# Back button (optional) %>
+  <% if local_assigns[:back_path] %>
+    <%= link_to back_path, class: "top-bar__back", "aria-label": "Go back" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    <% end %>
+  <% end %>
+
+  <%# Page title %>
+  <h1 class="top-bar__title"><%= local_assigns[:title] || "Splitwise" %></h1>
+
+  <%# Optional right-side action (edit button, save, etc.) %>
+  <% if local_assigns[:action_label] && local_assigns[:action_path] %>
+    <%= link_to action_label, action_path, class: "top-bar__action" %>
+  <% elsif local_assigns[:action_content] %>
+    <%= action_content %>
+  <% end %>
+</header>

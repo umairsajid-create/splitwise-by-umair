@@ -1,29 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Splitwise" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="application-name" content="Splitwise">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="<%= content_for(:description) || 'Split expenses easily with friends and groups' %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="app-wrapper">
+      <div class="app-container">
+
+        <%# Flash messages (toasts) — shown on every page %>
+        <%= render "shared/flash_messages" %>
+
+        <%# Top bar — only shown on inner pages (not auth pages) %>
+        <% if user_signed_in? && content_for?(:top_bar) %>
+          <%= yield :top_bar %>
+        <% end %>
+
+        <%# Main page content %>
+        <main class="<%= user_signed_in? ? 'page-content' : 'page-content--bare' %>">
+          <%= yield %>
+        </main>
+
+        <%# Bottom navigation — only shown when logged in %>
+        <% if user_signed_in? %>
+          <%= render "shared/bottom_nav" %>
+        <% end %>
+
+      </div>
+    </div>
   </body>
 </html>
