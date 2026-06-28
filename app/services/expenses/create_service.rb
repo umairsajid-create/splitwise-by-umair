@@ -18,6 +18,7 @@ module Expenses
         expense.save!
         create_splits(expense)
         recalculate_balances
+        create_notifications(expense)
       end
 
       expense
@@ -48,6 +49,22 @@ module Expenses
       user_ids = @split_data.map { |s| s[:user_id].to_i }.uniq
       User.where(id: user_ids).each do |user|
         Balances::RecalculateService.new(user).call
+      end
+    end
+
+    def create_notifications(expense)
+      notification = Notification.create!(
+        actor:             @creator,
+        notifiable:        expense,
+        notification_type: :expense_added,
+        title:             "New expense in #{@group.name}",
+        body:              "#{@creator.username} added \"#{expense.title}\""
+      )
+
+      # Recipients: all members of the group except the actor
+      recipients = @group.members.where.not(id: @creator.id)
+      recipients.each do |recipient|
+        notification.notification_recipients.create!(recipient: recipient)
       end
     end
   end

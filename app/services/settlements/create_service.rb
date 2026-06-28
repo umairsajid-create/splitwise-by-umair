@@ -44,9 +44,28 @@ module Settlements
         # Recalculate both users' balances
         Balances::RecalculateService.new(@payer).call
         Balances::RecalculateService.new(@receiver).call
+        create_notifications(settlement)
       end
 
       settlement
+    end
+
+    private
+
+    def create_notifications(settlement)
+      notification = Notification.create!(
+        actor:             @payer,
+        notifiable:        settlement,
+        notification_type: :settlement_made,
+        title:             "Payment received in #{@group.name}",
+        body:              "#{@payer.username} paid #{@receiver.username} #{settlement.total_amount_cents / 100.0} #{settlement.currency}"
+      )
+
+      # Recipients: all members of the group except the payer
+      recipients = @group.members.where.not(id: @payer.id)
+      recipients.each do |recipient|
+        notification.notification_recipients.create!(recipient: recipient)
+      end
     end
   end
 end

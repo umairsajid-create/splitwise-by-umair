@@ -9,5 +9,7 @@ class ActivityController < ApplicationController
                          .includes(:group, :created_by, :paid_by)
                          .order(created_at: :desc)
                          .limit(30)
+    # Mark all unread notifications for this user as read
+    current_user.notification_recipients.unread.update_all(read_at: Time.current)
   end
 end
