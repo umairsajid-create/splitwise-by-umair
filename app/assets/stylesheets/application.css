@@ -1252,7 +1252,370 @@ textarea.form-control {
 }
 
 /* ============================================================
-   25. GROUP COMPONENTS
+   25. EXPENSE FORM (Splitwise-style)
+   ============================================================ */
+
+/* CSS custom properties scoped to expense form */
+.expense-form, .ef-page-wrap {
+  --ef-side-pad: 20px;
+}
+
+/* Top bar override for expense page */
+.ef-top-bar {
+  display: flex;
+  align-items: center;
+  height: var(--top-bar-height);
+  padding: 0 var(--ef-side-pad);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  gap: 0;
+}
+.ef-top-bar__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-muted);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.ef-top-bar__close:hover { color: var(--text-primary); }
+.ef-top-bar__title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+.ef-top-bar__save {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 4px 0;
+  transition: opacity 0.15s;
+}
+.ef-top-bar__save:hover { opacity: 0.8; }
+
+/* "With you and:" row */
+.ef-with-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--ef-side-pad);
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.ef-with-label { white-space: nowrap; }
+.ef-with-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--bg-surface-2);
+  border-radius: 999px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--border-color);
+}
+.ef-group-name {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+/* Main fields: icon + input rows */
+.ef-main-fields {
+  padding: var(--space-lg) var(--ef-side-pad) var(--space-md);
+}
+.ef-field-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.ef-field-row:last-child { margin-bottom: 0; }
+
+.ef-field-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--border-radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+.ef-field-icon--currency {
+  font-size: var(--font-size-md);
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.ef-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+.ef-input::placeholder { color: var(--text-muted); }
+
+.ef-input--amount {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--text-muted);
+}
+.ef-input--amount:not(:placeholder-shown) {
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+/* Paid by + split row */
+.ef-paidby-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--ef-side-pad) var(--space-md);
+  flex-wrap: wrap;
+}
+.ef-paidby-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+.ef-pill-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.ef-pill-select:hover { border-color: var(--color-primary); }
+.ef-pill-native-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Bottom toolbar (date / group / notes) */
+.ef-toolbar {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding: var(--space-xs) var(--ef-side-pad);
+  gap: var(--space-md);
+  position: sticky;
+  bottom: calc(var(--nav-height, 60px));
+  background: var(--bg-surface);
+  z-index: 10;
+}
+.ef-toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs) 0;
+  transition: color 0.15s;
+}
+.ef-toolbar-btn:hover { color: var(--text-primary); }
+.ef-toolbar-btn svg { flex-shrink: 0; }
+.ef-hidden-date {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* Save button bar (mobile) */
+.ef-save-bar { display: none; } /* hidden — uses top bar label instead */
+.ef-save-btn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-xl);
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  cursor: pointer;
+}
+
+/* ── SPLIT MODAL ─────────────────────────────────────────── */
+.ef-split-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;   /* sheet from bottom on mobile */
+  justify-content: center;
+}
+.ef-split-modal__inner {
+  background: var(--bg-surface);
+  width: 100%;
+  max-width: 600px;
+  border-radius: 16px 16px 0 0;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.ef-split-modal__header {
+  display: flex;
+  align-items: center;
+  padding: var(--space-md) var(--ef-side-pad);
+  border-bottom: 1px solid var(--border-color);
+  gap: 0;
+}
+.ef-split-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--color-primary); font-size: var(--font-size-sm); font-weight: 600;
+  padding: 0;
+}
+.ef-split-done {
+  background: none; border: none; cursor: pointer;
+  color: var(--color-primary); font-size: var(--font-size-sm); font-weight: 700;
+  padding: 0;
+}
+.ef-split-modal__title {
+  flex: 1; text-align: center;
+  font-size: var(--font-size-md); font-weight: 600; margin: 0;
+}
+
+/* Split type tab bar */
+.ef-split-tabs {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--ef-side-pad);
+  border-bottom: 1px solid var(--border-color);
+}
+.ef-split-tab {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ef-split-tab--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* Mode description */
+.ef-split-mode-label {
+  padding: var(--space-sm) var(--ef-side-pad);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px solid var(--border-color);
+}
+.ef-split-mode-label strong { font-size: var(--font-size-sm); color: var(--text-primary); }
+.ef-split-mode-label span   { font-size: var(--font-size-xs); color: var(--text-muted); }
+
+/* Member rows */
+.ef-split-members { flex: 1; overflow-y: auto; }
+.ef-split-member {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--ef-side-pad);
+  border-bottom: 1px solid var(--border-color);
+}
+.ef-split-member__name { flex: 1; font-weight: 500; font-size: var(--font-size-sm); }
+.ef-split-member__check {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-surface-2);
+  border: 2px solid var(--border-color);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.ef-split-member__check.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.ef-split-member__input {
+  width: 90px;
+  text-align: right;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 4px 8px;
+  font-size: var(--font-size-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  outline: none;
+}
+.ef-split-member__input:focus { border-color: var(--color-primary); }
+
+/* Footer bar */
+.ef-split-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--ef-side-pad);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-surface);
+}
+.ef-split-footer__amount {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.ef-split-footer__all {
+  display: flex; align-items: center; gap: var(--space-sm);
+  font-size: var(--font-size-sm); color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* ── DESKTOP overrides for expense form ────────────────── */
+@media (min-width: 768px) {
+  .ef-split-modal { align-items: center; }
+  .ef-split-modal__inner {
+    border-radius: 16px;
+    max-height: 80vh;
+    width: 480px;
+  }
+  .ef-toolbar { bottom: 0; }
+  .ef-top-bar {
+    /* On desktop, mimic the inline heading approach */
+    display: flex;
+  }
+}
+
+/* ============================================================
+   26. GROUP COMPONENTS
    ============================================================ */
 
 /* Page heading */

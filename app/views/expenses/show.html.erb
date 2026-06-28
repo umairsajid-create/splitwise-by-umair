@@ -1,0 +1,104 @@
+<%# Expense Detail Page %>
+<% content_for :title, "#{@expense.title} — Splitwise" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Expense Details", back_path: group_path(@group) %>
+<% end %>
+
+<div class="animate-fade-in">
+
+  <%# Desktop Back Button %>
+  <div class="mb-md d-none-mobile">
+    <%= link_to group_path(@group), class: "text-muted d-flex align-center gap-xs" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to <%= @group.name %>
+    <% end %>
+  </div>
+
+  <%# Expense Hero %>
+  <div class="card card--shadow p-lg mb-lg text-center">
+    <div class="category-icon category-icon--<%= @expense.category %> mx-auto mb-sm" style="width: 64px; height: 64px; font-size: 32px;">
+      <%= { general: "🧾", food: "🍕", transport: "🚗", entertainment: "🎮",
+            utilities: "💡", rent: "🏠", shopping: "🛍️",
+            healthcare: "💊", other: "📦" }[@expense.category.to_sym] %>
+    </div>
+    
+    <h1 class="page-heading mb-xs"><%= @expense.title %></h1>
+    <div class="text-xl fw-bold mb-xs" style="color: var(--text-primary);">
+      <%= number_to_currency(@expense.total_amount_cents / 100.0, unit: @expense.currency + " ") %>
+    </div>
+    <div class="text-muted text-sm mb-md">
+      Added by <%= @expense.created_by.username %> on <%= @expense.expense_date.strftime("%B %d, %Y") %>
+    </div>
+    
+    <% if @expense.note.present? %>
+      <div class="p-sm bg-surface-2 text-sm text-left" style="border-radius: var(--border-radius-sm); border-left: 3px solid var(--color-primary);">
+        <%= @expense.note %>
+      </div>
+    <% end %>
+
+    <%# Delete Action — using button_to (renders a form) so it always works %>
+    <div class="mt-md pt-md border-top text-right">
+      <%= button_to group_expense_path(@group, @expense),
+            method: :delete,
+            form: { data: { turbo_confirm: "Are you sure you want to delete this expense? This will recalculate everyone's balances." } },
+            class: "btn btn--danger btn--sm" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+          <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Delete Expense
+      <% end %>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h3 class="section-title">Who Paid</h3>
+  </div>
+  <div class="card card--shadow mb-lg">
+    <div class="list-item">
+      <div class="avatar avatar--sm avatar--teal">
+        <%= @expense.paid_by.username.first.upcase %>
+      </div>
+      <div class="list-item__body">
+        <div class="list-item__title"><%= @expense.paid_by.username %></div>
+        <div class="list-item__subtitle">Paid the full amount</div>
+      </div>
+      <div class="list-item__meta">
+        <div class="list-item__amount amount--positive">
+          <%= number_to_currency(@expense.total_amount_cents / 100.0, unit: @expense.currency + " ") %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h3 class="section-title">How it was split</h3>
+  </div>
+  <div class="card card--shadow mb-lg">
+    <% @splits.each do |split| %>
+      <div class="list-item">
+        <div class="avatar avatar--sm avatar--teal">
+          <%= split.user.username.first.upcase %>
+        </div>
+        <div class="list-item__body">
+          <div class="list-item__title"><%= split.user.username %></div>
+          <div class="list-item__subtitle">
+            <% if split.user == @expense.paid_by %>
+              Owes <%= number_to_currency(split.owed_amount_cents / 100.0, unit: @expense.currency + " ") %> 
+              (Paid <%= number_to_currency(split.paid_amount_cents / 100.0, unit: @expense.currency + " ") %>)
+            <% else %>
+              Owes their share
+            <% end %>
+          </div>
+        </div>
+        <div class="list-item__meta">
+          <div class="list-item__amount <%= split.owed_amount_cents > 0 ? 'amount--negative' : 'amount--neutral' %>">
+            <%= number_to_currency(split.owed_amount_cents / 100.0, unit: @expense.currency + " ") %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="spacer--lg"></div>
+</div>

@@ -20,8 +20,10 @@ module Groups
     private
 
     def calculate_member_balance(user)
-      # SUM of (paid - owed) for all expense splits in this group
-      @group.expenses.active.joins(:expense_splits)
+      # Only count splits from ACTIVE expenses (status = 0)
+      @group.expenses
+            .where(status: 0)
+            .joins(:expense_splits)
             .where(expense_splits: { user_id: user.id })
             .sum("expense_splits.paid_amount_cents - expense_splits.owed_amount_cents")
     end

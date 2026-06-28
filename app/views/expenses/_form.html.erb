@@ -1,0 +1,336 @@
+<%# Expense Form — Splitwise-style UI %>
+<%= form_with model: [@group, @expense], local: true, class: "expense-form", id: "expense-form" do |f| %>
+
+  <% if @expense.errors.any? %>
+    <div class="ef-errors">
+      <% @expense.errors.full_messages.each do |msg| %>
+        <div>• <%= msg %></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# ── WITH ROW ─────────────────────────────────────────── %>
+  <div class="ef-with-row">
+    <span class="ef-with-label">With <strong>you</strong> and:</span>
+    <div class="ef-with-group">
+      <div class="avatar avatar--sm avatar--teal"><%= current_user.username.first.upcase %></div>
+      <span class="ef-group-name"><%= @group.name %></span>
+    </div>
+  </div>
+
+  <%# ── MAIN FIELDS ─────────────────────────────────────── %>
+  <div class="ef-main-fields">
+
+    <%# Description %>
+    <div class="ef-field-row">
+      <div class="ef-field-icon ef-field-icon--desc">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </div>
+      <%= f.text_field :title, class: "ef-input", placeholder: "Enter a description", required: true, id: "expense_title" %>
+    </div>
+
+    <%# Amount %>
+    <div class="ef-field-row">
+      <div class="ef-field-icon ef-field-icon--currency" id="ef-currency-badge">
+        <%= current_user.default_currency.presence || "PKR" %>
+      </div>
+      <input type="number" id="expense_total_amount" name="expense[total_amount_cents]"
+             class="ef-input ef-input--amount" placeholder="0.00" step="0.01" min="0.01" required
+             value="<%= @expense.total_amount_cents.present? ? (@expense.total_amount_cents / 100.0) : '' %>">
+    </div>
+
+  </div>
+
+  <%# ── PAID BY + SPLIT ROW ────────────────────────────── %>
+  <div class="ef-paidby-row">
+    <span class="ef-paidby-label">Paid by</span>
+
+    <div class="ef-pill-select" id="ef-paidby-pill">
+      <span class="ef-pill-value" id="ef-paidby-display"><%= current_user.username %></span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <%= f.collection_select :paid_by_id, @members, :id, :username,
+            { selected: current_user.id },
+            class: "ef-pill-native-select", id: "expense_paid_by_id" %>
+    </div>
+
+    <span class="ef-paidby-label">and split</span>
+
+    <div class="ef-pill-select" id="ef-split-pill">
+      <span class="ef-pill-value" id="ef-split-mode-label">equally</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+
+  <%# ── BOTTOM TOOLBAR ────────────────────────────────────── %>
+  <div class="ef-toolbar">
+    <button type="button" class="ef-toolbar-btn" id="ef-toolbar-date">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span id="ef-date-label">Today</span>
+      <input type="date" id="expense_expense_date" name="expense[expense_date]"
+             class="ef-hidden-date" required value="<%= Date.today %>">
+    </button>
+
+    <button type="button" class="ef-toolbar-btn" id="ef-toolbar-group">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span><%= @group.name %></span>
+    </button>
+
+    <button type="button" class="ef-toolbar-btn" id="ef-toolbar-note">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>Notes</span>
+    </button>
+  </div>
+
+  <%# Hidden note field expanded on click %>
+  <div id="ef-note-panel" style="display:none; padding: 0 var(--ef-side-pad) var(--space-md);">
+    <%= f.text_area :note, class: "ef-input", rows: 2, placeholder: "Add a note (optional)" %>
+  </div>
+
+  <%# Hidden category field %>
+  <%= f.hidden_field :category, value: "general" %>
+
+  <%# ── SPLIT MODAL ────────────────────────────────────────── %>
+  <div class="ef-split-modal" id="ef-split-modal" style="display:none;">
+    <div class="ef-split-modal__inner">
+
+      <div class="ef-split-modal__header">
+        <button type="button" class="ef-split-close" id="ef-split-cancel">Cancel</button>
+        <h3 class="ef-split-modal__title">Split options</h3>
+        <button type="button" class="ef-split-done" id="ef-split-done">Done</button>
+      </div>
+
+      <%# Split type tab bar %>
+      <div class="ef-split-tabs">
+        <button type="button" class="ef-split-tab ef-split-tab--active" data-mode="equal" title="Split equally">
+          <span style="font-size:18px; font-weight:900;">=</span>
+        </button>
+        <button type="button" class="ef-split-tab" data-mode="exact" title="Split by exact amounts">
+          <span style="font-size:14px; font-weight:700;">1.23</span>
+        </button>
+        <button type="button" class="ef-split-tab" data-mode="percentage" title="Split by percentages">
+          <span style="font-size:14px; font-weight:700;">%</span>
+        </button>
+      </div>
+
+      <div class="ef-split-mode-label" id="ef-mode-label-text">
+        <strong>Split equally</strong>
+        <span>Select which people owe an equal share.</span>
+      </div>
+
+      <%# Member list %>
+      <div class="ef-split-members" id="ef-split-members">
+        <% @members.each_with_index do |member, index| %>
+          <div class="ef-split-member" data-index="<%= index %>" data-user-id="<%= member.id %>">
+            <div class="avatar avatar--md avatar--teal ef-split-member__avatar">
+              <%= member.username.first.upcase %>
+            </div>
+            <div class="ef-split-member__name"><%= member.username %></div>
+
+            <%# Equal mode: checkbox %>
+            <div class="ef-split-member__check equal-check active">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+
+            <%# Exact / Percentage mode: amount input %>
+            <input type="number" class="ef-split-member__input exact-input" step="0.01" min="0" placeholder="0.00" style="display:none;">
+
+            <%# Hidden form fields %>
+            <input type="hidden" name="splits[<%= index %>][user_id]" value="<%= member.id %>">
+            <input type="hidden" name="splits[<%= index %>][owed_amount_cents]" class="split-cents-hidden" id="split_cents_<%= index %>">
+          </div>
+        <% end %>
+      </div>
+
+      <%# Footer bar: per-person amount %>
+      <div class="ef-split-footer">
+        <div class="ef-split-footer__amount" id="ef-per-person-label">
+          PKR 0.00/person
+        </div>
+        <div class="ef-split-footer__all" id="ef-footer-all">
+          <span>All</span>
+          <div class="ef-split-member__check active" style="width:28px;height:28px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <%# SAVE BUTTON — floated to top-right on desktop via layout, here for mobile %>
+  <div class="ef-save-bar">
+    <%= f.submit "Save", class: "ef-save-btn", id: "ef-submit-btn" %>
+  </div>
+
+<% end %>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("expense-form");
+  if (!form) return;
+
+  const totalInput   = document.getElementById("expense_total_amount");
+  const currencyBadge = document.getElementById("ef-currency-badge");
+  const paidBySelect  = document.getElementById("expense_paid_by_id");
+  const paidByDisplay = document.getElementById("ef-paidby-display");
+  const splitModal    = document.getElementById("ef-split-modal");
+  const splitPill     = document.getElementById("ef-split-pill");
+  const splitModeLbl  = document.getElementById("ef-split-mode-label");
+  const modeText      = document.getElementById("ef-mode-label-text");
+  const perPersonLbl  = document.getElementById("ef-per-person-label");
+  const dateInput     = document.getElementById("expense_expense_date");
+  const dateLbl       = document.getElementById("ef-date-label");
+  const noteBtn       = document.getElementById("ef-toolbar-note");
+  const notePanel     = document.getElementById("ef-note-panel");
+  const footerAll     = document.getElementById("ef-footer-all");
+
+  let splitMode = "equal";
+  const memberCount = document.querySelectorAll(".ef-split-member").length;
+
+  // ── Paid by pill sync ──────────────────────────────────
+  if (paidBySelect) {
+    paidBySelect.addEventListener("change", function() {
+      paidByDisplay.textContent = this.options[this.selectedIndex].text;
+    });
+  }
+
+  // ── Date picker ───────────────────────────────────────
+  document.getElementById("ef-toolbar-date").addEventListener("click", function() {
+    dateInput.showPicker ? dateInput.showPicker() : dateInput.click();
+  });
+  dateInput.addEventListener("change", function() {
+    if (!this.value) return;
+    const d = new Date(this.value + "T00:00:00");
+    const today = new Date(); today.setHours(0,0,0,0);
+    dateLbl.textContent = d.getTime() === today.getTime()
+      ? "Today"
+      : d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
+  });
+
+  // ── Note toggle ───────────────────────────────────────
+  noteBtn.addEventListener("click", function() {
+    notePanel.style.display = notePanel.style.display === "none" ? "block" : "none";
+  });
+
+  // ── Open/Close split modal ────────────────────────────
+  splitPill.addEventListener("click", function() {
+    updatePerPerson();
+    splitModal.style.display = "flex";
+  });
+  document.getElementById("ef-split-cancel").addEventListener("click", function() {
+    splitModal.style.display = "none";
+  });
+  document.getElementById("ef-split-done").addEventListener("click", function() {
+    splitModal.style.display = "none";
+    splitModeLbl.textContent = splitMode === "equal" ? "equally" : (splitMode === "exact" ? "by amount" : "by %");
+  });
+
+  // ── Split mode tabs ───────────────────────────────────
+  document.querySelectorAll(".ef-split-tab").forEach(function(tab) {
+    tab.addEventListener("click", function() {
+      splitMode = this.dataset.mode;
+      document.querySelectorAll(".ef-split-tab").forEach(t => t.classList.remove("ef-split-tab--active"));
+      this.classList.add("ef-split-tab--active");
+
+      const equalChecks  = document.querySelectorAll(".equal-check");
+      const exactInputs  = document.querySelectorAll(".exact-input");
+
+      if (splitMode === "equal") {
+        equalChecks.forEach(el => el.style.display = "flex");
+        exactInputs.forEach(el => el.style.display = "none");
+        modeText.innerHTML = "<strong>Split equally</strong><span>Select which people owe an equal share.</span>";
+        footerAll.style.display = "flex";
+      } else {
+        equalChecks.forEach(el => el.style.display = "none");
+        exactInputs.forEach(el => el.style.display = "block");
+        const label = splitMode === "exact" ? "Split by exact amounts" : "Split by percentages";
+        modeText.innerHTML = "<strong>" + label + "</strong><span>Enter the amount for each person.</span>";
+        footerAll.style.display = "none";
+      }
+      updatePerPerson();
+    });
+  });
+
+  // ── Toggle member check (equal mode) ─────────────────
+  document.querySelectorAll(".ef-split-member").forEach(function(row) {
+    row.querySelector(".equal-check").addEventListener("click", function() {
+      this.classList.toggle("active");
+      updatePerPerson();
+    });
+  });
+
+  // ── Toggle all ────────────────────────────────────────
+  footerAll.addEventListener("click", function() {
+    const allChecks = document.querySelectorAll(".equal-check");
+    const allActive = [...allChecks].every(c => c.classList.contains("active"));
+    allChecks.forEach(c => allActive ? c.classList.remove("active") : c.classList.add("active"));
+    updatePerPerson();
+  });
+
+  // ── Per person label ──────────────────────────────────
+  function updatePerPerson() {
+    const total  = parseFloat(totalInput.value) || 0;
+    if (splitMode === "equal") {
+      const active = document.querySelectorAll(".equal-check.active").length || 1;
+      perPersonLbl.textContent = "PKR " + (total / active).toFixed(2) + "/person (" + active + " people)";
+    } else {
+      perPersonLbl.textContent = "Total: PKR " + total.toFixed(2);
+    }
+  }
+
+  totalInput.addEventListener("input", updatePerPerson);
+
+  // ── On submit: build cents hidden fields ──────────────
+  form.addEventListener("submit", function(e) {
+    const totalRaw    = parseFloat(totalInput.value) || 0;
+    const totalCents  = Math.round(totalRaw * 100);
+
+    // Write cents back for param (server expects cents)
+    totalInput.value = totalCents;
+
+    if (splitMode === "equal") {
+      const activeChecks = document.querySelectorAll(".equal-check.active");
+      const activeIndexes = [...activeChecks].map(el => el.closest(".ef-split-member").dataset.index);
+      const count = activeIndexes.length;
+
+      if (count === 0) {
+        e.preventDefault();
+        totalInput.value = totalRaw;
+        alert("Please select at least one person to split with.");
+        return;
+      }
+
+      const share     = Math.floor(totalCents / count);
+      const remainder = totalCents - (share * count);
+
+      document.querySelectorAll(".ef-split-member").forEach(function(row, i) {
+        const idx = row.dataset.index;
+        const isActive = activeIndexes.includes(idx);
+        const amt = isActive ? share + (i === parseInt(activeIndexes[0]) ? remainder : 0) : 0;
+        document.getElementById("split_cents_" + idx).value = amt;
+      });
+
+    } else {
+      // Exact / percentage mode: read from inputs
+      let sumCents = 0;
+      document.querySelectorAll(".ef-split-member").forEach(function(row) {
+        const idx   = row.dataset.index;
+        const input = row.querySelector(".exact-input");
+        let val     = parseFloat(input.value) || 0;
+        if (splitMode === "percentage") val = totalRaw * val / 100;
+        const cents = Math.round(val * 100);
+        document.getElementById("split_cents_" + idx).value = cents;
+        sumCents += cents;
+      });
+
+      if (sumCents !== totalCents) {
+        e.preventDefault();
+        totalInput.value = totalRaw;
+        const label = splitMode === "percentage" ? "percentages don't add up to 100%" : "amounts don't match the total";
+        alert("Split " + label + ". Please fix the mismatch.");
+        return;
+      }
+    }
+  });
+});
+</script>
