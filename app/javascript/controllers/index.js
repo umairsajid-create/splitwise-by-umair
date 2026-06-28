@@ -4,8 +4,8 @@
 
 import { application } from "./application"
 
-import FlashController from "./flash_controller"
-application.register("flash", FlashController)
+import ExpenseFormController from "./expense_form_controller"
+application.register("expense-form", ExpenseFormController)
 
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
