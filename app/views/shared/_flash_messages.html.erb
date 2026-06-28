@@ -1,12 +1,9 @@
 <%# Flash message toasts — auto-dismiss via Stimulus %>
 <%# Shown at top of every page, stacks if multiple messages %>
 
-<div class="flash-container" aria-live="polite" data-turbo-cache="false">
+<div class="flash-container" aria-live="polite" id="global-flash-container" data-turbo-cache="false">
   <% flash.each do |type, message| %>
-    <div class="flash flash--<%= type %>"
-         data-controller="flash"
-         data-flash-delay-value="3000"
-         role="alert">
+    <div class="flash flash--<%= type %>" role="alert">
 
       <%# Icon based on type %>
       <% if type.to_s.in?(%w[notice success]) %>
@@ -32,7 +29,7 @@
 
       <%# Close button %>
       <button class="flash__close"
-              data-action="click->flash#dismiss"
+              onclick="dismissFlashMessage(this.closest('.flash'))"
               aria-label="Dismiss">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"/>
@@ -42,3 +39,21 @@
     </div>
   <% end %>
 </div>
+
+<script>
+  function dismissFlashMessage(el) {
+    if (!el) return;
+    el.style.transition = "opacity 0.35s cubic-bezier(0.47, 0, 0.745, 0.715), transform 0.35s cubic-bezier(0.47, 0, 0.745, 0.715)";
+    el.style.opacity = "0";
+    el.style.transform = "translateY(-60px)";
+    setTimeout(() => el.remove(), 350);
+  }
+
+  // Auto-dismiss newly rendered flash messages after 3 seconds
+  setTimeout(() => {
+    const container = document.getElementById("global-flash-container");
+    if (container) {
+      container.querySelectorAll('.flash').forEach(el => dismissFlashMessage(el));
+    }
+  }, 3000);
+</script>
