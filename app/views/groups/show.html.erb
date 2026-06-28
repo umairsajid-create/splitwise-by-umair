@@ -38,6 +38,51 @@
     <% end %>
   </div>
 
+  <%# ── MY BALANCE SUMMARY CARD ──────────────────────────── %>
+  <div class="grp-balance-card mb-md
+    <%= @my_balance_cents > 0 ? 'grp-balance-card--positive' : (@my_balance_cents < 0 ? 'grp-balance-card--negative' : 'grp-balance-card--neutral') %>">
+
+    <%# Total row %>
+    <div class="grp-balance-card__total">
+      <div class="grp-balance-card__label">
+        <% if @my_balance_cents > 0 %>
+          You are owed in this group
+        <% elsif @my_balance_cents < 0 %>
+          You owe in this group
+        <% else %>
+          You are all settled up
+        <% end %>
+      </div>
+      <div class="grp-balance-card__amount">
+        <% if @my_balance_cents == 0 %>
+          <span>🎉 &nbsp;PKR 0</span>
+        <% else %>
+          <%= number_to_currency(@my_balance_cents.abs / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Per-member breakdown %>
+    <% if @my_balance_detail.any? %>
+      <div class="grp-balance-card__divider"></div>
+      <% @my_balance_detail.each do |entry| %>
+        <div class="grp-balance-card__row">
+          <div class="avatar avatar--xs avatar--teal"><%= entry[:user].username.first.upcase %></div>
+          <div class="grp-balance-card__row-name"><%= entry[:user].username %></div>
+          <% if entry[:net_cents] > 0 %>
+            <div class="grp-balance-card__row-amount grp-balance-card__row-amount--owes-you">
+              owes you <%= number_to_currency(entry[:net_cents] / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+            </div>
+          <% else %>
+            <div class="grp-balance-card__row-amount grp-balance-card__row-amount--you-owe">
+              you owe <%= number_to_currency(entry[:net_cents].abs / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
   <%# Quick Action Buttons %>
   <div class="d-flex gap-sm mb-lg">
     <%= link_to new_group_expense_path(@group), class: "btn btn--primary flex-1" do %>
@@ -91,16 +136,27 @@
               <div class="list-item__title"><%= expense.title %></div>
               <div class="list-item__subtitle">
                 <% if expense.paid_by.present? %>
-                  <strong><%= expense.paid_by.username %></strong> paid
+                  <strong><%= expense.paid_by == current_user ? "You" : expense.paid_by.username %></strong> paid
                 <% end %>
                 · <%= expense.expense_date.strftime("%b %d") %>
               </div>
             </div>
             <div class="list-item__meta">
+              <%# Show my share on this expense %>
+              <% my_split = expense.expense_splits.find { |s| s.user_id == current_user.id } %>
               <div class="list-item__amount amount--neutral">
                 <%= number_to_currency(expense.total_amount_cents / 100.0,
                       unit: expense.currency + " ", precision: 0) %>
               </div>
+              <% if my_split %>
+                <% if expense.paid_by_id == current_user.id %>
+                  <div class="text-xs" style="color: var(--color-positive);">you paid</div>
+                <% elsif my_split.owed_amount_cents > 0 %>
+                  <div class="text-xs" style="color: var(--color-negative);">
+                    you owe <%= number_to_currency(my_split.owed_amount_cents / 100.0, unit: expense.currency + " ", precision: 0) %>
+                  </div>
+                <% end %>
+              <% end %>
             </div>
           <% end %>
         <% end %>
@@ -124,24 +180,24 @@
               <%= entry[:user].username.first.upcase %>
             </div>
             <div class="list-item__body">
-              <div class="list-item__title"><%= entry[:user].username %></div>
-              <div class="list-item__subtitle">
-                <% if entry[:user] == current_user %>
-                  <span class="text-muted">You</span>
-                <% end %>
+              <div class="list-item__title">
+                <%= entry[:user] == current_user ? "You" : entry[:user].username %>
               </div>
+              <% if entry[:user] == current_user %>
+                <div class="list-item__subtitle text-muted">Your balance</div>
+              <% end %>
             </div>
             <div class="list-item__meta">
               <% balance = entry[:balance_cents] %>
               <% if balance > 0 %>
                 <div class="list-item__amount amount--positive">
                   gets back <%= number_to_currency(balance / 100.0,
-                        unit: current_user.default_currency + " ", precision: 0) %>
+                        unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
                 </div>
               <% elsif balance < 0 %>
                 <div class="list-item__amount amount--negative">
                   owes <%= number_to_currency(balance.abs / 100.0,
-                        unit: current_user.default_currency + " ", precision: 0) %>
+                        unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
                 </div>
               <% else %>
                 <div class="list-item__amount amount--neutral">settled up</div>
@@ -174,9 +230,9 @@
               <span class="badge badge--admin">Admin</span>
             <% end %>
             <% if @group.admin?(current_user) && gm.user != current_user %>
-              <%= link_to group_group_member_path(@group, gm),
+              <%= button_to group_group_member_path(@group, gm),
                     method: :delete,
-                    data: { confirm: "Remove #{gm.user.username} from this group?" },
+                    form: { data: { turbo_confirm: "Remove #{gm.user.username} from this group?" } },
                     class: "btn-icon btn-icon--danger" do %>
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                      viewBox="0 0 24 24" fill="none" stroke="currentColor"

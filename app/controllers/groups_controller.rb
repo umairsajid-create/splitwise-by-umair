@@ -18,6 +18,21 @@ class GroupsController < ApplicationController
                       .order(expense_date: :desc)
                       .limit(20)
     @balances = Groups::BalanceService.new(@group).call
+
+    # My own net balance in this group (positive = others owe me, negative = I owe)
+    @my_balance_cents = @balances.find { |b| b[:user] == current_user }&.dig(:balance_cents) || 0
+
+    # Per-member breakdown: what I owe to each person / what each owes me
+    # We compute bilateral net between current_user and every other member
+    service = Groups::BalanceService.new(@group)
+    @my_balance_detail = @balances.reject { |b| b[:user] == current_user }.map do |entry|
+      other = entry[:user]
+      # Net = what other paid for me minus what I paid for them
+      i_owe_other   = compute_bilateral_cents(@group, payer: other, ower: current_user)
+      other_owes_me = compute_bilateral_cents(@group, payer: current_user, ower: other)
+      net = other_owes_me - i_owe_other   # positive = they owe me, negative = I owe them
+      { user: other, net_cents: net }
+    end.reject { |b| b[:net_cents] == 0 }
   end
 
   # GET /groups/new
@@ -70,5 +85,15 @@ class GroupsController < ApplicationController
 
   def group_params
     params.require(:group).permit(:name, :group_type, :avatar)
+  end
+
+  # How much does `ower` owe `payer` in this group?
+  # = ower's owed_amount_cents on expenses paid by payer
+  def compute_bilateral_cents(group, payer:, ower:)
+    group.expenses
+         .where(status: 0, paid_by_id: payer.id)
+         .joins(:expense_splits)
+         .where(expense_splits: { user_id: ower.id })
+         .sum("expense_splits.owed_amount_cents")
   end
 end
