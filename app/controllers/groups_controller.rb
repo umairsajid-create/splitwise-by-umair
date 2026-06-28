@@ -87,11 +87,10 @@ class GroupsController < ApplicationController
     params.require(:group).permit(:name, :group_type, :avatar)
   end
 
-  # How much does `ower` owe `payer` in this group?
-  # = ower's owed_amount_cents on expenses paid by payer
   def compute_bilateral_cents(group, payer:, ower:)
     group.expenses
-         .where(status: 0, paid_by_id: payer.id)
+         .where(status: 0)
+         .where("paid_by_id = ? OR (paid_by_id IS NULL AND created_by_id = ?)", payer.id, payer.id)
          .joins(:expense_splits)
          .where(expense_splits: { user_id: ower.id })
          .sum("expense_splits.owed_amount_cents")

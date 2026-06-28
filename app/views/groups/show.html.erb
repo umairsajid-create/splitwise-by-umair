@@ -189,14 +189,15 @@
             </div>
             <div class="list-item__meta">
               <% balance = entry[:balance_cents] %>
+              <% is_me = entry[:user] == current_user %>
               <% if balance > 0 %>
                 <div class="list-item__amount amount--positive">
-                  gets back <%= number_to_currency(balance / 100.0,
+                  <%= is_me ? "get back" : "gets back" %> <%= number_to_currency(balance / 100.0,
                         unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
                 </div>
               <% elsif balance < 0 %>
                 <div class="list-item__amount amount--negative">
-                  owes <%= number_to_currency(balance.abs / 100.0,
+                  <%= is_me ? "owe" : "owes" %> <%= number_to_currency(balance.abs / 100.0,
                         unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
                 </div>
               <% else %>
