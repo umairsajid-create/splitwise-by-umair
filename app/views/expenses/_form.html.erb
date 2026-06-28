@@ -1,5 +1,5 @@
 <%# Expense Form — Splitwise-style UI %>
-<%= form_with model: [@group, @expense], local: true, class: "expense-form", id: "expense-form" do |f| %>
+<%= form_with model: [@group, @expense], local: true, class: "expense-form", id: "expense-form", data: { turbo: false } do |f| %>
 
   <% if @expense.errors.any? %>
     <div class="ef-errors">
@@ -29,15 +29,18 @@
       <%= f.text_field :title, class: "ef-input", placeholder: "Enter a description", required: true, id: "expense_title" %>
     </div>
 
-    <%# Amount %>
+    <%# Amount — user types PKR, JS converts to cents in hidden field %>
     <div class="ef-field-row">
       <div class="ef-field-icon ef-field-icon--currency" id="ef-currency-badge">
         <%= current_user.default_currency.presence || "PKR" %>
       </div>
-      <input type="number" id="expense_total_amount" name="expense[total_amount_cents]"
-             class="ef-input ef-input--amount" placeholder="0.00" step="0.01" min="0.01" required
-             value="<%= @expense.total_amount_cents.present? ? (@expense.total_amount_cents / 100.0) : '' %>">
+      <%# Display-only input — NOT submitted. We read this value in JS and put cents in the hidden field %>
+      <input type="number" id="expense_total_amount_display"
+             class="ef-input ef-input--amount" placeholder="0.00" step="1" min="1" required
+             value="<%= @expense.total_amount_cents.present? ? (@expense.total_amount_cents / 100.0).to_i : '' %>">
     </div>
+    <%# Hidden field that actually gets submitted — JS fills this with (display_value * 100) %>
+    <input type="hidden" id="expense_total_amount_cents" name="expense[total_amount_cents]" value="0">
 
   </div>
 
@@ -200,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const form = document.getElementById("expense-form");
   if (!form) return;
 
-  const totalInput   = document.getElementById("expense_total_amount");
+  const totalInput   = document.getElementById("expense_total_amount_display");
   const currencyBadge = document.getElementById("ef-currency-badge");
   const paidBySelect  = document.getElementById("expense_paid_by_id");
   const paidByDisplay = document.getElementById("ef-paidby-display");
@@ -332,25 +335,30 @@ document.addEventListener("DOMContentLoaded", function() {
 
   totalInput.addEventListener("input", updatePerPerson);
 
-  // ── On submit: build cents hidden fields ──────────────
+  // ── On submit: calculate cents & splits, then submit normally ────────
   form.addEventListener("submit", function(e) {
-    if (form.dataset.calculated === "true") return; // Allow submit to proceed
+    e.preventDefault();
 
-    e.preventDefault(); // Stop initial submit so we can modify the DOM
+    // Read the human-friendly display amount (e.g. 2500 PKR)
+    const displayInput = document.getElementById("expense_total_amount_display");
+    const centsField   = document.getElementById("expense_total_amount_cents");
+    const totalRaw     = parseFloat(displayInput.value) || 0;
 
-    const totalRaw    = parseFloat(totalInput.value) || 0;
-    const totalCents  = Math.round(totalRaw * 100);
+    if (totalRaw <= 0) {
+      alert("Please enter a valid amount.");
+      return;
+    }
 
-    // Write cents back for param (server expects cents)
-    totalInput.value = totalCents;
+    // Convert to cents and store in the hidden submitted field
+    const totalCents = Math.round(totalRaw * 100);
+    centsField.value = totalCents;
 
     if (splitMode === "equal") {
-      const activeChecks = document.querySelectorAll(".equal-check.active");
+      const activeChecks  = document.querySelectorAll(".equal-check.active");
       const activeIndexes = [...activeChecks].map(el => el.closest(".ef-split-member").dataset.index);
       const count = activeIndexes.length;
 
       if (count === 0) {
-        totalInput.value = totalRaw;
         alert("Please select at least one person to split with.");
         return;
       }
@@ -359,36 +367,37 @@ document.addEventListener("DOMContentLoaded", function() {
       const remainder = totalCents - (share * count);
 
       document.querySelectorAll(".ef-split-member").forEach(function(row, i) {
-        const idx = row.dataset.index;
+        const idx      = row.dataset.index;
         const isActive = activeIndexes.includes(idx);
-        const amt = isActive ? share + (i === parseInt(activeIndexes[0]) ? remainder : 0) : 0;
+        // First active member absorbs any rounding remainder
+        const amt      = isActive ? share + (idx === activeIndexes[0] ? remainder : 0) : 0;
         document.getElementById("split_cents_" + idx).value = amt;
       });
 
     } else {
-      // Exact / percentage mode: read from inputs
+      // Exact / Percentage mode
       let sumCents = 0;
       document.querySelectorAll(".ef-split-member").forEach(function(row) {
         const idx   = row.dataset.index;
         const input = row.querySelector(".exact-input");
         let val     = parseFloat(input.value) || 0;
-        if (splitMode === "percentage") val = totalRaw * val / 100;
+        if (splitMode === "percentage") val = totalRaw * val / 100;  // convert % to PKR amount
         const cents = Math.round(val * 100);
         document.getElementById("split_cents_" + idx).value = cents;
         sumCents += cents;
       });
 
       if (sumCents !== totalCents) {
-        totalInput.value = totalRaw;
-        const label = splitMode === "percentage" ? "percentages don't add up to 100%" : "amounts don't match the total";
-        alert("Split " + label + ". Please fix the mismatch.");
+        const label = splitMode === "percentage"
+          ? "Percentages must add up to 100%. Currently: " + (sumCents / totalRaw).toFixed(1) + "%"
+          : "Amounts (" + (sumCents/100).toFixed(2) + ") don't match the total (" + totalRaw.toFixed(2) + ")";
+        alert(label);
         return;
       }
     }
 
-    // All good! Re-trigger submit via requestSubmit so Turbo catches it with the modified DOM
-    form.dataset.calculated = "true";
-    form.requestSubmit();
+    // All calculations done — submit the form normally (no Turbo, no race conditions)
+    form.submit();
   });
 });
 </script>
