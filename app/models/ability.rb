@@ -7,16 +7,13 @@ class Ability
     # Guest users (not logged in) can't do anything
     return unless user.present?
 
-    # =========================================== =
     # ALL USERS — own groups they are members of
-    # ============================================
+
     can :read,    Group, group_members: { user_id: user.id }
     can :update,  Group, group_members: { user_id: user.id, role: :admin }
     can :destroy, Group, creator_id: user.id
 
-    # ============================================
     # PREMIUM + ADMIN users only
-    # ============================================
     if user.premium_or_admin?
       can :create,        Group
       can :view_charts,   Group
@@ -26,9 +23,8 @@ class Ability
       can :manage,        DefaultSplit, user_id: user.id
     end
 
-    # ============================================
+
     # ADMIN only
-    # ============================================
     if user.admin?
       can :manage, :all
     end
