@@ -1,0 +1,53 @@
+<%# Shared form partial for New and Edit group %>
+
+<%= form_with model: group, local: true, class: "group-form" do |f| %>
+
+  <%# Validation errors %>
+  <% if group.errors.any? %>
+    <div class="form-errors">
+      <% group.errors.full_messages.each do |msg| %>
+        <div>• <%= msg %></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Group Name %>
+  <div class="form-group">
+    <%= f.label :name, "Group Name", class: "form-label" %>
+    <%= f.text_field :name,
+          class: "form-control",
+          placeholder: "e.g. Bangkok Trip, Home Expenses",
+          required: true,
+          maxlength: 100 %>
+  </div>
+
+  <%# Group Type %>
+  <div class="form-group">
+    <%= f.label :group_type, "Group Type", class: "form-label" %>
+    <div class="group-type-selector">
+      <% [
+        { value: "home",   icon: "🏠", label: "Home" },
+        { value: "trip",   icon: "✈️", label: "Trip" },
+        { value: "couple", icon: "💑", label: "Couple" },
+        { value: "other",  icon: "👥", label: "Other" }
+      ].each do |opt| %>
+        <label class="group-type-option">
+          <%= f.radio_button :group_type, opt[:value],
+                class: "group-type-radio",
+                id: "group_type_#{opt[:value]}" %>
+          <span class="group-type-card" data-value="<%= opt[:value] %>">
+            <span class="group-type-card__icon"><%= opt[:icon] %></span>
+            <span class="group-type-card__label"><%= opt[:label] %></span>
+          </span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Submit %>
+  <div class="mt-lg">
+    <%= f.submit yield(:submit_label) { "Save Group" },
+          class: "btn btn--primary btn--block btn--lg" %>
+  </div>
+
+<% end %>

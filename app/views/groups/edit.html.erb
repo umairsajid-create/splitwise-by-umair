@@ -1,0 +1,29 @@
+<%# Edit Group Page %>
+<% content_for :title, "Edit #{@group.name} — Splitwise" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Edit Group", back_path: group_path(@group) %>
+<% end %>
+
+<div class="animate-fade-in">
+  <div class="auth-card" style="max-width: 560px; margin: 0 auto;">
+    <h2 class="auth-card__title">Edit Group</h2>
+    <p class="auth-card__subtitle">Update your group's name or type</p>
+
+    <% content_for :submit_label, "Save Changes" %>
+    <%= render "form", group: @group %>
+
+    <%# Danger zone — Archive / Delete %>
+    <div class="danger-zone">
+      <div class="danger-zone__label">Danger Zone</div>
+      <%= link_to group_path(@group),
+            method: :delete,
+            data: { confirm: "Archive \"#{@group.name}\"? This will hide it from your groups list." },
+            class: "btn btn--danger btn--sm btn--block" do %>
+        Archive Group
+      <% end %>
+    </div>
+  </div>
+
+  <div class="spacer--lg"></div>
+</div>

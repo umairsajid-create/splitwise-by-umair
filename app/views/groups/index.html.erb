@@ -1,0 +1,104 @@
+<%# Groups Index Page %>
+<% content_for :title, "Groups — Splitwise" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Groups" %>
+<% end %>
+
+<div class="animate-fade-in">
+
+  <%# Header row: title + create button %>
+  <div class="d-flex justify-between align-center mb-md">
+    <div>
+      <h1 class="page-heading">Your Groups</h1>
+      <p class="text-muted" style="font-size: var(--font-size-sm); margin-top: 2px;">
+        <%= pluralize(@groups.count, "group") %>
+      </p>
+    </div>
+    <% if can? :create, Group %>
+      <%= link_to new_group_path, class: "btn btn--primary btn--sm" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Group
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# Groups List %>
+  <% if @groups.any? %>
+    <div class="groups-grid">
+      <% @groups.each do |group| %>
+        <%= link_to group_path(group), class: "group-card" do %>
+          <%# Group Avatar %>
+          <div class="group-card__avatar group-card__avatar--<%= group.group_type %>">
+            <% if group.avatar.attached? %>
+              <%= image_tag group.avatar, class: "group-card__avatar-img" %>
+            <% else %>
+              <%= group.name.first(2).upcase %>
+            <% end %>
+          </div>
+
+          <%# Group Info %>
+          <div class="group-card__body">
+            <div class="group-card__name"><%= group.name %></div>
+            <div class="group-card__meta">
+              <span class="badge badge--<%= group.group_type %>">
+                <%= group.group_type.capitalize %>
+              </span>
+              <span class="group-card__members">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <%= group.group_members.count %> members
+              </span>
+            </div>
+          </div>
+
+          <%# Chevron %>
+          <div class="group-card__arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+  <% else %>
+    <%# Empty state %>
+    <div class="empty-state">
+      <div class="empty-state__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h3 class="empty-state__title">No groups yet</h3>
+      <p class="empty-state__body">
+        Groups let you share expenses with roommates, friends, or travel buddies.
+      </p>
+      <% if can? :create, Group %>
+        <%= link_to "Create your first group", new_group_path, class: "btn btn--primary" %>
+      <% else %>
+        <p class="text-muted" style="font-size: var(--font-size-sm);">
+          Ask a friend to invite you to a group, or upgrade to Premium to create your own.
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="spacer--lg"></div>
+</div>
