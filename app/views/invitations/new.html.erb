@@ -1,0 +1,28 @@
+<% content_for :title, "Invite friends — #{@group.name}" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Add friends to group", back_path: group_path(@group) %>
+<% end %>
+
+<div class="animate-fade-in ef-page-wrap">
+  <div class="card card--shadow p-lg mt-md">
+    <div class="text-center mb-md">
+      <div class="avatar avatar--lg avatar--teal mx-auto mb-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </div>
+      <h2 class="fw-bold mb-xs">Invite to <%= @group.name %></h2>
+      <p class="text-muted text-sm">Enter their email address and we'll send them a link to join the group.</p>
+    </div>
+
+    <%= form_with url: group_invitations_path(@group), local: true, class: "mt-md" do |f| %>
+      <div class="form-group">
+        <%= f.label :email, "Email Address", class: "form-label" %>
+        <%= f.email_field :email, class: "form-control", placeholder: "friend@example.com", required: true %>
+      </div>
+
+      <div class="mt-lg">
+        <%= f.submit "Send Invitation", class: "btn btn--primary btn--block" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -28,6 +28,10 @@ Rails.application.routes.draw do
   # ─────────────────────────────────────────
   get "activity", to: "activity#index", as: :activity
 
+  # Invitations (token-based)
+  get  "invitations/:token/accept",  to: "invitations#accept",  as: :accept_invitation
+  post "invitations/:token/confirm", to: "invitations#confirm", as: :confirm_invitation
+
   # ─────────────────────────────────────────
   # Profile stub (nav links to this)
   # ─────────────────────────────────────────
