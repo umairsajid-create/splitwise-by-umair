@@ -55,12 +55,13 @@
     <h3 class="section-title">Who Paid</h3>
   </div>
   <div class="card card--shadow mb-lg">
+    <% payer = @expense.paid_by || @expense.created_by %>
     <div class="list-item">
       <div class="avatar avatar--sm avatar--teal">
-        <%= @expense.paid_by.username.first.upcase %>
+        <%= payer.username.first.upcase %>
       </div>
       <div class="list-item__body">
-        <div class="list-item__title"><%= @expense.paid_by.username %></div>
+        <div class="list-item__title"><%= payer.username %></div>
         <div class="list-item__subtitle">Paid the full amount</div>
       </div>
       <div class="list-item__meta">
@@ -83,7 +84,7 @@
         <div class="list-item__body">
           <div class="list-item__title"><%= split.user.username %></div>
           <div class="list-item__subtitle">
-            <% if split.user == @expense.paid_by %>
+            <% if split.user == payer %>
               Owes <%= number_to_currency(split.owed_amount_cents / 100.0, unit: @expense.currency + " ") %> 
               (Paid <%= number_to_currency(split.paid_amount_cents / 100.0, unit: @expense.currency + " ") %>)
             <% else %>
