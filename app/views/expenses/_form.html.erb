@@ -31,20 +31,18 @@
       <%= f.text_field :title, class: "ef-input", placeholder: "Enter a description", required: true %>
     </div>
 
-    <%# Amount — user types PKR, JS converts to cents in hidden field %>
+    <%# Amount — user types whole number (e.g. 4000), controller converts to cents %>
     <div class="ef-field-row">
       <div class="ef-field-icon ef-field-icon--currency" id="ef-currency-badge">
         <%= current_user.default_currency.presence || "PKR" %>
       </div>
-      <%# Display-only input — NOT submitted. We read this value in JS and put cents in the hidden field %>
       <input type="number" 
-             class="ef-input ef-input--amount" placeholder="0.00" step="1" min="1" required
+             name="expense[total_amount]" id="expense_total_amount"
+             class="ef-input ef-input--amount" placeholder="0" step="1" min="1" required
              value="<%= @expense.total_amount_cents.present? ? (@expense.total_amount_cents / 100.0).to_i : '' %>"
              data-expense-form-target="totalDisplay"
              data-action="input->expense-form#updateCalculations">
     </div>
-    <%# Hidden field that actually gets submitted — JS fills this with (display_value * 100) %>
-    <input type="hidden" name="expense[total_amount_cents]" value="0" data-expense-form-target="totalCents">
 
   </div>
 

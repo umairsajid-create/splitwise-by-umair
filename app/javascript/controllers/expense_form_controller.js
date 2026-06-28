@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [
-    "totalDisplay", "totalCents",
+    "totalDisplay",
     "splitModeTab", "equalCheck", "exactInput", "splitCents",
     "perPersonLbl", "modeText", "footerAll",
     "splitModal", "categoryModal",
@@ -33,10 +33,6 @@ export default class extends Controller {
     
     const totalRaw = parseFloat(this.totalDisplayTarget.value) || 0;
     const totalCents = Math.round(totalRaw * 100);
-    
-    if (this.hasTotalCentsTarget) {
-      this.totalCentsTarget.value = totalCents;
-    }
 
     if (this.splitMode === "equal") {
       const activeChecks = this.equalCheckTargets.filter(el => el.classList.contains("active"));

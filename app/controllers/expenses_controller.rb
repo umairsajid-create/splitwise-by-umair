@@ -13,11 +13,18 @@ class ExpensesController < ApplicationController
 
   # POST /groups/:group_id/expenses
   def create
+    # Convert whole-number amount to cents (e.g. user types 4000 -> 400000 cents)
+    raw_params = expense_params
+    if raw_params[:total_amount].present?
+      raw_params = raw_params.merge(total_amount_cents: (raw_params[:total_amount].to_f * 100).round)
+    end
+    raw_params = raw_params.except(:total_amount)
+
     service = Expenses::CreateService.new(
       group:      @group,
       creator:    current_user,
-      params:     expense_params,
-      split_data: split_params
+      params:     raw_params,
+      split_data: build_split_data(raw_params[:total_amount_cents])
     )
 
     @expense = service.call
@@ -55,18 +62,33 @@ class ExpensesController < ApplicationController
 
   def expense_params
     params.require(:expense).permit(
-      :title, :category, :total_amount_cents, :currency,
+      :title, :category, :total_amount, :total_amount_cents, :currency,
       :split_type, :expense_date, :note, :paid_by_id, :proof
     )
   end
 
-  # Expects: splits: { "0" => { user_id: 1, owed_amount_cents: 1000 }, ... }
-  def split_params
+  # Build split data: use JS-provided cents if available, else split equally
+  def build_split_data(total_cents)
     splits_hash = params.fetch(:splits, {})
     splits_array = splits_hash.respond_to?(:values) ? splits_hash.values : splits_hash
+    permitted = splits_array.map { |s| s.permit(:user_id, :owed_amount_cents) }
+
+    # Check if JS provided valid split data
+    js_sum = permitted.sum { |s| s[:owed_amount_cents].to_i }
     
-    splits_array.map do |split|
-      split.permit(:user_id, :owed_amount_cents)
+    if js_sum > 0
+      # JS calculated splits correctly — use them
+      permitted
+    else
+      # JS failed — fall back to equal split among all members
+      member_ids = @group.members.pluck(:id)
+      count = member_ids.size
+      share = total_cents / count rescue 0
+      remainder = total_cents - (share * count) rescue 0
+      member_ids.each_with_index.map do |uid, i|
+        amt = share + (i == 0 ? remainder : 0)
+        ActionController::Parameters.new(user_id: uid.to_s, owed_amount_cents: amt.to_s).permit(:user_id, :owed_amount_cents)
+      end
     end
   end
 end
