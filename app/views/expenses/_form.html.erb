@@ -269,7 +269,7 @@
 
   // ── Open/Close split modal ────────────────────────────
   splitPill.addEventListener("click", function() {
-    updatePerPerson();
+    updateCalculations();
     splitModal.style.display = "flex";
   });
   document.getElementById("ef-split-cancel").addEventListener("click", function() {
@@ -302,7 +302,7 @@
         modeText.innerHTML = "<strong>" + label + "</strong><span>Enter the amount for each person.</span>";
         footerAll.style.display = "none";
       }
-      updatePerPerson();
+      updateCalculations();
     });
   });
 
@@ -310,8 +310,14 @@
   document.querySelectorAll(".ef-split-member").forEach(function(row) {
     row.querySelector(".equal-check").addEventListener("click", function() {
       this.classList.toggle("active");
-      updatePerPerson();
+      updateCalculations();
     });
+    
+    // Also listen to exact/percentage input changes
+    const input = row.querySelector(".exact-input");
+    if (input) {
+      input.addEventListener("input", updateCalculations);
+    }
   });
 
   // ── Toggle all ────────────────────────────────────────
@@ -319,85 +325,89 @@
     const allChecks = document.querySelectorAll(".equal-check");
     const allActive = [...allChecks].every(c => c.classList.contains("active"));
     allChecks.forEach(c => allActive ? c.classList.remove("active") : c.classList.add("active"));
-    updatePerPerson();
+    updateCalculations();
   });
 
-  // ── Per person label ──────────────────────────────────
-  function updatePerPerson() {
-    const total  = parseFloat(totalInput.value) || 0;
+  // ── Real-time calculations ───────────────────────────────
+  function updateCalculations() {
+    const totalRaw = parseFloat(totalInput.value) || 0;
+    const totalCents = Math.round(totalRaw * 100);
+    const centsField = document.getElementById("expense_total_amount_cents");
+    
+    // 1. Update main total hidden field
+    if (centsField) centsField.value = totalCents;
+
+    // 2. Update split hidden fields
     if (splitMode === "equal") {
-      const active = document.querySelectorAll(".equal-check.active").length || 1;
-      perPersonLbl.textContent = "PKR " + (total / active).toFixed(2) + "/person (" + active + " people)";
+      const activeChecks = document.querySelectorAll(".equal-check.active");
+      const active = activeChecks.length || 1;
+      
+      // Update UI label
+      perPersonLbl.textContent = "PKR " + (totalRaw / active).toFixed(2) + "/person (" + active + " people)";
+      
+      // Calculate splits
+      if (activeChecks.length > 0) {
+        const activeIndexes = [...activeChecks].map(el => el.closest(".ef-split-member").dataset.index);
+        const share = Math.floor(totalCents / activeIndexes.length);
+        const remainder = totalCents - (share * activeIndexes.length);
+
+        document.querySelectorAll(".ef-split-member").forEach(function(row, i) {
+          const idx = row.dataset.index;
+          const isActive = activeIndexes.includes(idx);
+          const amt = isActive ? share + (idx === activeIndexes[0] ? remainder : 0) : 0;
+          const hiddenInput = document.getElementById("split_cents_" + idx);
+          if (hiddenInput) hiddenInput.value = amt;
+        });
+      }
     } else {
-      perPersonLbl.textContent = "Total: PKR " + total.toFixed(2);
+      // Update UI label
+      perPersonLbl.textContent = "Total: PKR " + totalRaw.toFixed(2);
+      
+      // Exact or Percentage Mode
+      document.querySelectorAll(".ef-split-member").forEach(function(row) {
+        const idx = row.dataset.index;
+        const input = row.querySelector(".exact-input");
+        let val = parseFloat(input.value) || 0;
+        if (splitMode === "percentage") val = totalRaw * val / 100;
+        const hiddenInput = document.getElementById("split_cents_" + idx);
+        if (hiddenInput) hiddenInput.value = Math.round(val * 100);
+      });
     }
   }
 
-  totalInput.addEventListener("input", updatePerPerson);
+  totalInput.addEventListener("input", updateCalculations);
+  // Run once on load to initialize values
+  updateCalculations();
 
-  // ── On submit: calculate cents & splits, then submit normally ────────
+  // ── On submit validation only ────────
   form.addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    // Read the human-friendly display amount (e.g. 2500 PKR)
-    const displayInput = document.getElementById("expense_total_amount_display");
-    const centsField   = document.getElementById("expense_total_amount_cents");
-    const totalRaw     = parseFloat(displayInput.value) || 0;
-
+    const totalRaw = parseFloat(totalInput.value) || 0;
+    const totalCents = Math.round(totalRaw * 100);
+    
     if (totalRaw <= 0) {
+      e.preventDefault();
       alert("Please enter a valid amount.");
       return;
     }
 
-    // Convert to cents and store in the hidden submitted field
-    const totalCents = Math.round(totalRaw * 100);
-    centsField.value = totalCents;
-
-    if (splitMode === "equal") {
-      const activeChecks  = document.querySelectorAll(".equal-check.active");
-      const activeIndexes = [...activeChecks].map(el => el.closest(".ef-split-member").dataset.index);
-      const count = activeIndexes.length;
-
-      if (count === 0) {
-        alert("Please select at least one person to split with.");
-        return;
-      }
-
-      const share     = Math.floor(totalCents / count);
-      const remainder = totalCents - (share * count);
-
-      document.querySelectorAll(".ef-split-member").forEach(function(row, i) {
-        const idx      = row.dataset.index;
-        const isActive = activeIndexes.includes(idx);
-        // First active member absorbs any rounding remainder
-        const amt      = isActive ? share + (idx === activeIndexes[0] ? remainder : 0) : 0;
-        document.getElementById("split_cents_" + idx).value = amt;
-      });
-
-    } else {
-      // Exact / Percentage mode
+    if (splitMode !== "equal") {
       let sumCents = 0;
       document.querySelectorAll(".ef-split-member").forEach(function(row) {
-        const idx   = row.dataset.index;
-        const input = row.querySelector(".exact-input");
-        let val     = parseFloat(input.value) || 0;
-        if (splitMode === "percentage") val = totalRaw * val / 100;  // convert % to PKR amount
-        const cents = Math.round(val * 100);
-        document.getElementById("split_cents_" + idx).value = cents;
-        sumCents += cents;
+        const idx = row.dataset.index;
+        sumCents += parseInt(document.getElementById("split_cents_" + idx).value) || 0;
       });
 
       if (sumCents !== totalCents) {
+        e.preventDefault();
         const label = splitMode === "percentage"
-          ? "Percentages must add up to 100%. Currently: " + (sumCents / totalRaw).toFixed(1) + "%"
+          ? "Percentages must add up to 100%. Currently: " + ((sumCents / totalCents) * 100).toFixed(1) + "%"
           : "Amounts (" + (sumCents/100).toFixed(2) + ") don't match the total (" + totalRaw.toFixed(2) + ")";
         alert(label);
         return;
       }
     }
-
-    // All calculations done — submit the form normally (no Turbo, no race conditions)
-    form.submit();
+    
+    // Everything is already pre-calculated in hidden fields, so just let the form submit!
   });
 })();
 </script>
