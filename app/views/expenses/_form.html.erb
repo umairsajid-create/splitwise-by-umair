@@ -1,6 +1,7 @@
-<%# Expense Form — Splitwise-style UI %>
-<%= form_with model: [@group, @expense], local: true, class: "expense-form", id: "expense-form", 
-              data: { turbo: false, controller: "expense-form", action: "submit->expense-form#submit" } do |f| %>
+<%# Expense Form — clean, all features working %>
+<%= form_with model: [@group, @expense], local: true,
+      class: "expense-form", id: "expense-form",
+      data: { turbo: false, controller: "expense-form", action: "submit->expense-form#submit" } do |f| %>
 
   <% if @expense.errors.any? %>
     <div class="ef-errors">
@@ -22,24 +23,26 @@
   <%# ── MAIN FIELDS ─────────────────────────────────────── %>
   <div class="ef-main-fields">
 
-    <%# Description %>
+    <%# Description with category icon button %>
     <div class="ef-field-row">
-      <button type="button" class="ef-field-icon ef-field-icon--desc" style="border:none; cursor:pointer; font-size: 20px; display:flex; align-items:center; justify-content:center; background:none;"
+      <button type="button" class="ef-field-icon ef-field-icon--desc"
+              style="border:none; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; background:none;"
               data-action="click->expense-form#openCategoryModal">
         <span data-expense-form-target="categoryIconDisp">🧾</span>
       </button>
       <%= f.text_field :title, class: "ef-input", placeholder: "Enter a description", required: true %>
     </div>
 
-    <%# Amount — user types whole number (e.g. 4000), controller converts to cents %>
+    <%# Amount — submits as whole number, controller converts to cents %>
     <div class="ef-field-row">
-      <div class="ef-field-icon ef-field-icon--currency" id="ef-currency-badge">
+      <div class="ef-field-icon ef-field-icon--currency">
         <%= current_user.default_currency.presence || "PKR" %>
       </div>
-      <input type="number" 
+      <input type="number"
              name="expense[total_amount]" id="expense_total_amount"
-             class="ef-input ef-input--amount" placeholder="0" step="1" min="1" required
-             value="<%= @expense.total_amount_cents.present? ? (@expense.total_amount_cents / 100.0).to_i : '' %>"
+             class="ef-input ef-input--amount"
+             placeholder="0" step="1" min="1" required
+             value="<%= @expense.total_amount_cents.present? && @expense.total_amount_cents > 0 ? (@expense.total_amount_cents / 100.0).to_i : '' %>"
              data-expense-form-target="totalDisplay"
              data-action="input->expense-form#updateCalculations">
     </div>
@@ -50,34 +53,38 @@
   <div class="ef-paidby-row">
     <span class="ef-paidby-label">Paid by</span>
 
-    <div class="ef-pill-select" data-action="click->expense-form#syncPaidBy">
+    <div class="ef-pill-select">
       <span class="ef-pill-value" data-expense-form-target="paidByDisplay"><%= current_user.username %></span>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       <%= f.collection_select :paid_by_id, @members, :id, :username,
             { selected: current_user.id },
-            class: "ef-pill-native-select", data: { expense_form_target: "paidBySelect", action: "change->expense-form#syncPaidBy" } %>
+            class: "ef-pill-native-select",
+            data: { expense_form_target: "paidBySelect", action: "change->expense-form#syncPaidBy" } %>
     </div>
 
     <span class="ef-paidby-label">and split</span>
 
-    <div class="ef-pill-select" data-action="click->expense-form#openSplitModal">
+    <div class="ef-pill-select" style="cursor:pointer;" data-action="click->expense-form#openSplitModal">
       <span class="ef-pill-value" data-expense-form-target="splitModeLbl">equally</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
   </div>
 
-  <%# ── BOTTOM TOOLBAR ────────────────────────────────────── %>
+  <%# ── BOTTOM TOOLBAR ──── date input OUTSIDE the button so it can be triggered properly %>
   <div class="ef-toolbar">
-    <button type="button" class="ef-toolbar-btn" data-action="click->expense-form#openDatePicker">
+
+    <%# Date — label triggers the hidden date input directly %>
+    <label class="ef-toolbar-btn" style="cursor:pointer;">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <span data-expense-form-target="dateLbl">Today</span>
       <input type="date" name="expense[expense_date]"
-             class="ef-hidden-date" required value="<%= Date.today %>"
+             class="ef-hidden-date" required
+             value="<%= Date.today %>"
              data-expense-form-target="dateInput"
              data-action="change->expense-form#updateDateLabel">
-    </button>
+    </label>
 
-    <button type="button" class="ef-toolbar-btn" id="ef-toolbar-group">
+    <button type="button" class="ef-toolbar-btn">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span><%= @group.name %></span>
     </button>
@@ -88,16 +95,20 @@
     </button>
   </div>
 
-  <%# Hidden note field expanded on click %>
-  <div id="ef-note-panel" style="display:none; padding: 0 var(--ef-side-pad) var(--space-md);" data-expense-form-target="notePanel">
-    <%= f.text_area :note, class: "ef-input", rows: 2, placeholder: "Add a note (optional)" %>
+  <%# Note panel — hidden, toggled by Notes button %>
+  <div style="display:none; padding: 0 var(--ef-side-pad) var(--space-md);"
+       data-expense-form-target="notePanel">
+    <%= f.text_area :note, class: "ef-input", rows: 3,
+          placeholder: "Add a note (optional)",
+          value: @expense.note %>
   </div>
 
-  <%# Hidden category field %>
+  <%# Hidden fields %>
   <%= f.hidden_field :category, value: "general", data: { expense_form_target: "categoryInput" } %>
+  <%= f.hidden_field :split_type, value: "equal", id: "expense_split_type_field", data: { expense_form_target: "splitTypeField" } %>
 
   <%# ── SPLIT MODAL ────────────────────────────────────────── %>
-  <div class="ef-split-modal" id="ef-split-modal" style="display:none;" data-expense-form-target="splitModal">
+  <div class="ef-split-modal" style="display:none;" data-expense-form-target="splitModal">
     <div class="ef-split-modal__inner">
 
       <div class="ef-split-modal__header">
@@ -106,15 +117,21 @@
         <button type="button" class="ef-split-done" data-action="click->expense-form#doneSplitModal">Done</button>
       </div>
 
-      <%# Split type tab bar %>
+      <%# Split mode tabs %>
       <div class="ef-split-tabs">
-        <button type="button" class="ef-split-tab ef-split-tab--active" data-mode="equal" title="Split equally" data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode">
+        <button type="button" class="ef-split-tab ef-split-tab--active" data-mode="equal"
+                data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode"
+                title="Split equally">
           <span style="font-size:18px; font-weight:900;">=</span>
         </button>
-        <button type="button" class="ef-split-tab" data-mode="exact" title="Split by exact amounts" data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode">
+        <button type="button" class="ef-split-tab" data-mode="exact"
+                data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode"
+                title="Split by exact amounts">
           <span style="font-size:14px; font-weight:700;">1.23</span>
         </button>
-        <button type="button" class="ef-split-tab" data-mode="percentage" title="Split by percentages" data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode">
+        <button type="button" class="ef-split-tab" data-mode="percentage"
+                data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode"
+                title="Split by percentage">
           <span style="font-size:14px; font-weight:700;">%</span>
         </button>
       </div>
@@ -125,37 +142,44 @@
       </div>
 
       <%# Member list %>
-      <div class="ef-split-members" id="ef-split-members">
+      <div class="ef-split-members">
         <% @members.each_with_index do |member, index| %>
           <div class="ef-split-member" data-index="<%= index %>" data-user-id="<%= member.id %>">
             <div class="avatar avatar--md avatar--teal ef-split-member__avatar">
               <%= member.username.first.upcase %>
             </div>
-            
-            <%# Exact or Percentage Input (hidden by default) %>
-            <input type="number" class="ef-input exact-input" style="display:none; width: 80px; text-align:right;" placeholder="0" step="1"
-                   data-expense-form-target="exactInput" data-action="input->expense-form#updateCalculations">
-            
-            <%# Equal Check (visible by default) %>
-            <div class="ef-split-member__check equal-check active" data-expense-form-target="equalCheck" data-action="click->expense-form#toggleMember">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
 
             <div class="ef-split-member__name"><%= member.username %></div>
 
-            <%# Hidden form fields %>
+            <%# Exact / % input (hidden by default) %>
+            <input type="number" class="ef-input exact-input"
+                   style="display:none; width:80px; text-align:right;"
+                   placeholder="0" step="any" min="0"
+                   data-expense-form-target="exactInput"
+                   data-action="input->expense-form#updateCalculations">
+
+            <%# Equal check (visible by default) %>
+            <div class="ef-split-member__check equal-check active"
+                 data-expense-form-target="equalCheck"
+                 data-action="click->expense-form#toggleMember">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+
+            <%# Hidden fields submitted with form %>
             <input type="hidden" name="splits[<%= index %>][user_id]" value="<%= member.id %>">
-            <input type="hidden" name="splits[<%= index %>][owed_amount_cents]" class="split-cents-hidden" data-expense-form-target="splitCents">
+            <input type="hidden" name="splits[<%= index %>][owed_amount_cents]"
+                   data-expense-form-target="splitCents">
           </div>
         <% end %>
       </div>
 
-      <%# Footer bar: per-person amount %>
+      <%# Footer: per-person label + All toggle %>
       <div class="ef-split-footer">
         <div class="ef-split-footer__amount" data-expense-form-target="perPersonLbl">
           PKR 0.00/person
         </div>
-        <div class="ef-split-footer__all" data-expense-form-target="footerAll" data-action="click->expense-form#toggleAll">
+        <div class="ef-split-footer__all" data-expense-form-target="footerAll"
+             data-action="click->expense-form#toggleAll">
           <span>All</span>
           <div class="ef-split-member__check active" style="width:28px;height:28px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -169,24 +193,26 @@
   <%# ── CATEGORY MODAL ────────────────────────────────────── %>
   <div class="ef-split-modal" style="display:none;" data-expense-form-target="categoryModal">
     <div class="ef-split-modal__inner" style="max-height:80vh; overflow-y:auto;">
-      <div class="ef-split-modal__header" style="justify-content: flex-start; gap: var(--space-md);">
+      <div class="ef-split-modal__header" style="justify-content:flex-start; gap:var(--space-md);">
         <button type="button" class="ef-split-close" data-action="click->expense-form#closeCategoryModal">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <h3 class="ef-split-modal__title" style="margin:0;">Select Category</h3>
       </div>
 
-      <div class="ef-split-members" style="padding-top: var(--space-md);">
+      <div class="ef-split-members" style="padding-top:var(--space-md);">
         <% [
-            ["general", "🧾", "General"],
-            ["food", "🍔", "Food & Drink"],
-            ["transport", "🚗", "Transportation"],
-            ["utilities", "💡", "Utilities"],
+            ["general",       "🧾", "General"],
+            ["food",          "🍔", "Food & Drink"],
+            ["transport",     "🚗", "Transportation"],
+            ["utilities",     "💡", "Utilities"],
             ["entertainment", "🎫", "Entertainment"],
-            ["groceries", "🛒", "Groceries"],
-            ["other_category", "📝", "Other"]
+            ["groceries",     "🛒", "Groceries"],
+            ["other_category","📝", "Other"]
            ].each do |value, icon, label| %>
-          <div class="ef-split-member category-option" style="cursor:pointer;" data-value="<%= value %>" data-icon="<%= icon %>" data-action="click->expense-form#selectCategory">
+          <div class="ef-split-member category-option" style="cursor:pointer;"
+               data-value="<%= value %>" data-icon="<%= icon %>"
+               data-action="click->expense-form#selectCategory">
             <div class="avatar avatar--sm avatar--slate"><%= icon %></div>
             <div class="ef-split-member__info">
               <span class="ef-split-member__name"><%= label %></span>
@@ -197,8 +223,9 @@
     </div>
   </div>
 
-  <%# SAVE BUTTON — floated to top-right on desktop via layout, here for mobile %>
+  <%# SAVE BUTTON %>
   <div class="ef-save-bar">
     <%= f.submit "Save", class: "ef-save-btn", id: "ef-submit-btn" %>
   </div>
+
 <% end %>
