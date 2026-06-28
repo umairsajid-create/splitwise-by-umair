@@ -3,6 +3,15 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_permitted_parameters
 
+  def destroy
+    if current_user.balance_cents != 0
+      flash[:alert] = "You cannot delete your account until all your balances are settled."
+      redirect_to edit_user_registration_path
+    else
+      super
+    end
+  end
+
   protected
 
   def configure_permitted_parameters
@@ -19,15 +28,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
       params.delete(:password_confirmation)
       params.delete(:current_password)
       resource.update_without_password(params)
-    end
-  end
-
-  def destroy
-    if current_user.balance_cents != 0
-      flash[:alert] = "You cannot delete your account until all your balances are settled."
-      redirect_to edit_user_registration_path
-    else
-      super
     end
   end
 end
