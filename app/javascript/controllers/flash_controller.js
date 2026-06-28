@@ -4,14 +4,16 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  // Value: how many ms before auto-dismiss (default 4000ms)
-  static values = { delay: { type: Number, default: 4000 } }
+  // Value: how many ms before auto-dismiss
+  static values = { delay: Number }
 
   connect() {
+    const timeout = this.delayValue || 3000
+    console.log("FlashController connected! Delay:", timeout)
     // Start auto-dismiss timer when the flash appears
     this.timer = setTimeout(() => {
       this.dismiss()
-    }, this.delayValue)
+    }, timeout)
   }
 
   disconnect() {
