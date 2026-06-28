@@ -199,7 +199,7 @@
 <% end %>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+(function() {
   const form = document.getElementById("expense-form");
   if (!form) return;
 
@@ -399,5 +399,5 @@ document.addEventListener("DOMContentLoaded", function() {
     // All calculations done — submit the form normally (no Turbo, no race conditions)
     form.submit();
   });
-});
+})();
 </script>
