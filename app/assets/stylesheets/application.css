@@ -1307,7 +1307,8 @@ textarea.form-control {
   font-size: var(--font-size-sm);
   cursor: pointer;
   flex-shrink: 0;
-  padding: 4px 0;
+  padding: 6px 12px;
+  margin-right: 8px;
   transition: opacity 0.15s;
 }
 .ef-top-bar__save:hover { opacity: 0.8; }

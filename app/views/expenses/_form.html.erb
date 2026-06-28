@@ -334,6 +334,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // ── On submit: build cents hidden fields ──────────────
   form.addEventListener("submit", function(e) {
+    if (form.dataset.calculated === "true") return; // Allow submit to proceed
+
+    e.preventDefault(); // Stop initial submit so we can modify the DOM
+
     const totalRaw    = parseFloat(totalInput.value) || 0;
     const totalCents  = Math.round(totalRaw * 100);
 
@@ -346,7 +350,6 @@ document.addEventListener("DOMContentLoaded", function() {
       const count = activeIndexes.length;
 
       if (count === 0) {
-        e.preventDefault();
         totalInput.value = totalRaw;
         alert("Please select at least one person to split with.");
         return;
@@ -376,13 +379,16 @@ document.addEventListener("DOMContentLoaded", function() {
       });
 
       if (sumCents !== totalCents) {
-        e.preventDefault();
         totalInput.value = totalRaw;
         const label = splitMode === "percentage" ? "percentages don't add up to 100%" : "amounts don't match the total";
         alert("Split " + label + ". Please fix the mismatch.");
         return;
       }
     }
+
+    // All good! Re-trigger submit via requestSubmit so Turbo catches it with the modified DOM
+    form.dataset.calculated = "true";
+    form.requestSubmit();
   });
 });
 </script>
