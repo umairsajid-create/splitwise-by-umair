@@ -1,33 +1,54 @@
-<%# Activity feed — stub view (fully built in Branch 7) %>
-
 <% content_for :title, "Activity — Splitwise" %>
 
 <% content_for :top_bar do %>
-  <%= render "shared/top_bar", title: "Activity" %>
+  <header class="top-bar">
+    <div class="top-bar__left"></div>
+    <div class="top-bar__title">Recent Activity</div>
+    <div class="top-bar__right"></div>
+  </header>
 <% end %>
 
 <div class="animate-fade-in">
-  <% if @notifications.empty? %>
-    <div class="empty-state">
-      <div class="empty-state__icon">🔔</div>
-      <div class="empty-state__title">No activity yet</div>
-      <div class="empty-state__text">Your notifications will appear here when group members add expenses.</div>
+  <h1 class="page-heading mb-md d-none-mobile">Recent Activity</h1>
+
+  <% if @activities.empty? %>
+    <div class="card p-xl text-center mt-md">
+      <div class="avatar avatar--xl avatar--teal mx-auto mb-md" style="background: var(--bg-surface-2); color: var(--text-muted);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+      </div>
+      <h3 class="fw-bold mb-xs">No activity yet!</h3>
+      <p class="text-muted text-sm">Activities from your groups will appear here.</p>
     </div>
   <% else %>
     <div class="card card--shadow">
-      <% @notifications.each do |nr| %>
-        <div class="list-item">
-          <div class="avatar avatar--sm" style="background:var(--color-primary);">
-            <%= nr.notification.actor.username.first.upcase %>
+      <% @activities.each do |activity| %>
+        <%= link_to group_expense_path(activity.group, activity), class: "list-item text-decoration-none" do %>
+          <div class="category-icon category-icon--<%= activity.category %>">
+            <%= { general: "🧾", food: "🍕", transport: "🚗", entertainment: "🎮",
+                  utilities: "💡", rent: "🏠", shopping: "🛍️",
+                  healthcare: "💊", other: "📦" }[activity.category.to_sym] || "🧾" %>
           </div>
+          
           <div class="list-item__body">
-            <div class="list-item__title"><%= nr.notification.title %></div>
-            <div class="list-item__subtitle"><%= time_ago_in_words(nr.created_at) %> ago</div>
+            <div class="list-item__title text-primary"><%= activity.title %></div>
+            <div class="list-item__subtitle">
+              <% if activity.settlement? %>
+                <%= activity.created_by.username %> paid <%= activity.expense_splits.where(owed_amount_cents: 0).first&.user&.username %>
+              <% else %>
+                <%= activity.created_by.username %> added an expense in "<%= activity.group.name %>"
+              <% end %>
+            </div>
           </div>
-          <% unless nr.read? %>
-            <div style="width:8px;height:8px;background:var(--color-primary);border-radius:50%;flex-shrink:0;"></div>
-          <% end %>
-        </div>
+          
+          <div class="list-item__meta text-right">
+            <div class="text-sm fw-bold">
+              <%= number_to_currency(activity.total_amount_cents / 100.0, unit: activity.currency + " ") %>
+            </div>
+            <div class="text-xs text-muted mt-xs">
+              <%= time_ago_in_words(activity.created_at) %> ago
+            </div>
+          </div>
+        <% end %>
       <% end %>
     </div>
   <% end %>
