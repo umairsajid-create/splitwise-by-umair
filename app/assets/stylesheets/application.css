@@ -119,7 +119,19 @@ img {
 
 button, input, select, textarea {
   font-family: inherit;
-  font-size: inherit;
+  font-size: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Hide number input spinners (up/down arrows) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 ul, ol {

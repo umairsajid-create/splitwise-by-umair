@@ -93,14 +93,7 @@
                 placeholder: "Same new password again" %>
         </div>
 
-        <div class="form-group">
-          <%= f.label :current_password, "Current password", class: "form-label" %>
-          <%= f.password_field :current_password,
-                autocomplete: "current-password",
-                class: "form-control",
-                placeholder: "Required to save changes" %>
-          <span class="form-hint">Required to confirm any changes above</span>
-        </div>
+        <p class="form-hint mt-xs">Note: You do not need your current password to save changes.</p>
 
       </div>
     </div>
