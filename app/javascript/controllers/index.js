@@ -4,9 +4,6 @@
 
 import { application } from "./application"
 
-import ExpenseFormController from "./expense_form_controller"
-application.register("expense-form", ExpenseFormController)
-
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 

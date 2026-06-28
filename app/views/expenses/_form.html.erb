@@ -1,7 +1,7 @@
-<%# Expense Form — clean, all features working %>
+<%# Expense Form — Plain Vanilla JS, No Frameworks %>
 <%= form_with model: [@group, @expense], local: true,
       class: "expense-form", id: "expense-form",
-      data: { turbo: false, controller: "expense-form", action: "submit->expense-form#submit" } do |f| %>
+      data: { turbo: false } do |f| %>
 
   <% if @expense.errors.any? %>
     <div class="ef-errors">
@@ -23,17 +23,16 @@
   <%# ── MAIN FIELDS ─────────────────────────────────────── %>
   <div class="ef-main-fields">
 
-    <%# Description with category icon button %>
+    <%# Description %>
     <div class="ef-field-row">
-      <button type="button" class="ef-field-icon ef-field-icon--desc"
-              style="border:none; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; background:none;"
-              data-action="click->expense-form#openCategoryModal">
-        <span data-expense-form-target="categoryIconDisp">🧾</span>
+      <button type="button" class="ef-field-icon ef-field-icon--desc" id="ef-category-trigger"
+              style="border:none; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; background:none;">
+        <span id="ef-category-icon-display">🧾</span>
       </button>
       <%= f.text_field :title, class: "ef-input", placeholder: "Enter a description", required: true %>
     </div>
 
-    <%# Amount — submits as whole number, controller converts to cents %>
+    <%# Amount %>
     <div class="ef-field-row">
       <div class="ef-field-icon ef-field-icon--currency">
         <%= current_user.default_currency.presence || "PKR" %>
@@ -42,9 +41,7 @@
              name="expense[total_amount]" id="expense_total_amount"
              class="ef-input ef-input--amount"
              placeholder="0" step="1" min="1" required
-             value="<%= @expense.total_amount_cents.present? && @expense.total_amount_cents > 0 ? (@expense.total_amount_cents / 100.0).to_i : '' %>"
-             data-expense-form-target="totalDisplay"
-             data-action="input->expense-form#updateCalculations">
+             value="<%= @expense.total_amount_cents.present? && @expense.total_amount_cents > 0 ? (@expense.total_amount_cents / 100.0).to_i : '' %>">
     </div>
 
   </div>
@@ -54,34 +51,30 @@
     <span class="ef-paidby-label">Paid by</span>
 
     <div class="ef-pill-select">
-      <span class="ef-pill-value" data-expense-form-target="paidByDisplay"><%= current_user.username %></span>
+      <span class="ef-pill-value" id="ef-paidby-display"><%= current_user.username %></span>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       <%= f.collection_select :paid_by_id, @members, :id, :username,
             { selected: current_user.id },
-            class: "ef-pill-native-select",
-            data: { expense_form_target: "paidBySelect", action: "change->expense-form#syncPaidBy" } %>
+            class: "ef-pill-native-select", id: "expense_paid_by_id" %>
     </div>
 
     <span class="ef-paidby-label">and split</span>
 
-    <div class="ef-pill-select" style="cursor:pointer;" data-action="click->expense-form#openSplitModal">
-      <span class="ef-pill-value" data-expense-form-target="splitModeLbl">equally</span>
+    <div class="ef-pill-select" style="cursor:pointer;" id="ef-split-trigger">
+      <span class="ef-pill-value" id="ef-split-mode-label">equally</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
   </div>
 
-  <%# ── BOTTOM TOOLBAR ──── date input OUTSIDE the button so it can be triggered properly %>
+  <%# ── BOTTOM TOOLBAR ────────────────────────────────────── %>
   <div class="ef-toolbar">
 
-    <%# Date — label triggers the hidden date input directly %>
     <label class="ef-toolbar-btn" style="cursor:pointer;">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span data-expense-form-target="dateLbl">Today</span>
-      <input type="date" name="expense[expense_date]"
+      <span id="ef-date-label">Today</span>
+      <input type="date" name="expense[expense_date]" id="expense_date_input"
              class="ef-hidden-date" required
-             value="<%= Date.today %>"
-             data-expense-form-target="dateInput"
-             data-action="change->expense-form#updateDateLabel">
+             value="<%= Date.today %>">
     </label>
 
     <button type="button" class="ef-toolbar-btn">
@@ -89,54 +82,45 @@
       <span><%= @group.name %></span>
     </button>
 
-    <button type="button" class="ef-toolbar-btn" data-action="click->expense-form#toggleNote">
+    <button type="button" class="ef-toolbar-btn" id="ef-note-trigger">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       <span>Notes</span>
     </button>
   </div>
 
-  <%# Note panel — hidden, toggled by Notes button %>
-  <div style="display:none; padding: 0 var(--ef-side-pad) var(--space-md);"
-       data-expense-form-target="notePanel">
-    <%= f.text_area :note, class: "ef-input", rows: 3,
-          placeholder: "Add a note (optional)",
-          value: @expense.note %>
+  <%# Note panel %>
+  <div id="ef-note-panel" style="display:none; padding: 0 var(--ef-side-pad) var(--space-md);">
+    <%= f.text_area :note, class: "ef-input", rows: 3, placeholder: "Add a note (optional)", id: "expense_note_input", value: @expense.note %>
   </div>
 
   <%# Hidden fields %>
-  <%= f.hidden_field :category, value: "general", data: { expense_form_target: "categoryInput" } %>
-  <%= f.hidden_field :split_type, value: "equal", id: "expense_split_type_field", data: { expense_form_target: "splitTypeField" } %>
+  <%= f.hidden_field :category, value: "general", id: "expense_category" %>
+  <%= f.hidden_field :split_type, value: "equal", id: "expense_split_type_field" %>
 
   <%# ── SPLIT MODAL ────────────────────────────────────────── %>
-  <div class="ef-split-modal" style="display:none;" data-expense-form-target="splitModal">
+  <div class="ef-split-modal" id="ef-split-modal" style="display:none;">
     <div class="ef-split-modal__inner">
 
       <div class="ef-split-modal__header">
-        <button type="button" class="ef-split-close" data-action="click->expense-form#closeSplitModal">Cancel</button>
+        <button type="button" class="ef-split-close" id="ef-split-cancel">Cancel</button>
         <h3 class="ef-split-modal__title">Split options</h3>
-        <button type="button" class="ef-split-done" data-action="click->expense-form#doneSplitModal">Done</button>
+        <button type="button" class="ef-split-done" id="ef-split-done">Done</button>
       </div>
 
       <%# Split mode tabs %>
       <div class="ef-split-tabs">
-        <button type="button" class="ef-split-tab ef-split-tab--active" data-mode="equal"
-                data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode"
-                title="Split equally">
+        <button type="button" class="ef-split-tab ef-split-tab--active" data-mode="equal" title="Split equally">
           <span style="font-size:18px; font-weight:900;">=</span>
         </button>
-        <button type="button" class="ef-split-tab" data-mode="exact"
-                data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode"
-                title="Split by exact amounts">
+        <button type="button" class="ef-split-tab" data-mode="exact" title="Split by exact amounts">
           <span style="font-size:14px; font-weight:700;">1.23</span>
         </button>
-        <button type="button" class="ef-split-tab" data-mode="percentage"
-                data-expense-form-target="splitModeTab" data-action="click->expense-form#switchMode"
-                title="Split by percentage">
+        <button type="button" class="ef-split-tab" data-mode="percentage" title="Split by percentage">
           <span style="font-size:14px; font-weight:700;">%</span>
         </button>
       </div>
 
-      <div class="ef-split-mode-label" data-expense-form-target="modeText">
+      <div class="ef-split-mode-label" id="ef-mode-label-text">
         <strong>Split equally</strong>
         <span>Select which people owe an equal share.</span>
       </div>
@@ -144,42 +128,36 @@
       <%# Member list %>
       <div class="ef-split-members">
         <% @members.each_with_index do |member, index| %>
-          <div class="ef-split-member" data-index="<%= index %>" data-user-id="<%= member.id %>">
+          <div class="ef-split-member js-split-row" data-index="<%= index %>">
             <div class="avatar avatar--md avatar--teal ef-split-member__avatar">
               <%= member.username.first.upcase %>
             </div>
 
             <div class="ef-split-member__name"><%= member.username %></div>
 
-            <%# Exact / % input (hidden by default) %>
+            <%# Exact / % input %>
             <input type="number" class="ef-input exact-input"
                    style="display:none; width:80px; text-align:right;"
-                   placeholder="0" step="any" min="0"
-                   data-expense-form-target="exactInput"
-                   data-action="input->expense-form#updateCalculations">
+                   placeholder="0" step="any" min="0">
 
-            <%# Equal check (visible by default) %>
-            <div class="ef-split-member__check equal-check active"
-                 data-expense-form-target="equalCheck"
-                 data-action="click->expense-form#toggleMember">
+            <%# Equal check %>
+            <div class="ef-split-member__check equal-check active">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
 
             <%# Hidden fields submitted with form %>
             <input type="hidden" name="splits[<%= index %>][user_id]" value="<%= member.id %>">
-            <input type="hidden" name="splits[<%= index %>][owed_amount_cents]"
-                   data-expense-form-target="splitCents">
+            <input type="hidden" name="splits[<%= index %>][owed_amount_cents]" class="split-cents-hidden" id="split_cents_<%= index %>">
           </div>
         <% end %>
       </div>
 
-      <%# Footer: per-person label + All toggle %>
+      <%# Footer %>
       <div class="ef-split-footer">
-        <div class="ef-split-footer__amount" data-expense-form-target="perPersonLbl">
+        <div class="ef-split-footer__amount" id="ef-per-person-label">
           PKR 0.00/person
         </div>
-        <div class="ef-split-footer__all" data-expense-form-target="footerAll"
-             data-action="click->expense-form#toggleAll">
+        <div class="ef-split-footer__all" id="ef-footer-all">
           <span>All</span>
           <div class="ef-split-member__check active" style="width:28px;height:28px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -191,10 +169,10 @@
   </div>
 
   <%# ── CATEGORY MODAL ────────────────────────────────────── %>
-  <div class="ef-split-modal" style="display:none;" data-expense-form-target="categoryModal">
+  <div class="ef-split-modal" id="ef-category-modal" style="display:none;">
     <div class="ef-split-modal__inner" style="max-height:80vh; overflow-y:auto;">
       <div class="ef-split-modal__header" style="justify-content:flex-start; gap:var(--space-md);">
-        <button type="button" class="ef-split-close" data-action="click->expense-form#closeCategoryModal">
+        <button type="button" class="ef-split-close" id="ef-category-close">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <h3 class="ef-split-modal__title" style="margin:0;">Select Category</h3>
@@ -211,8 +189,7 @@
             ["other_category","📝", "Other"]
            ].each do |value, icon, label| %>
           <div class="ef-split-member category-option" style="cursor:pointer;"
-               data-value="<%= value %>" data-icon="<%= icon %>"
-               data-action="click->expense-form#selectCategory">
+               data-value="<%= value %>" data-icon="<%= icon %>">
             <div class="avatar avatar--sm avatar--slate"><%= icon %></div>
             <div class="ef-split-member__info">
               <span class="ef-split-member__name"><%= label %></span>
@@ -229,3 +206,221 @@
   </div>
 
 <% end %>
+
+<script>
+// Use a self-executing function to avoid global namespace pollution
+(function initExpenseForm() {
+  const form = document.getElementById("expense-form");
+  if (!form) return;
+
+  // Wait for the DOM to be fully loaded/rendered, or run immediately if ready
+  const runSetup = () => {
+    // Basic elements
+    const totalInput = document.getElementById("expense_total_amount");
+    const paidBySelect = document.getElementById("expense_paid_by_id");
+    const paidByDisplay = document.getElementById("ef-paidby-display");
+    const splitTypeField = document.getElementById("expense_split_type_field");
+    const categoryInput = document.getElementById("expense_category");
+    const categoryIconDisp = document.getElementById("ef-category-icon-display");
+
+    // Toggles
+    const noteTrigger = document.getElementById("ef-note-trigger");
+    const notePanel = document.getElementById("ef-note-panel");
+    const noteInput = document.getElementById("expense_note_input");
+    const dateInput = document.getElementById("expense_date_input");
+    const dateLabel = document.getElementById("ef-date-label");
+
+    // Modals
+    const splitTrigger = document.getElementById("ef-split-trigger");
+    const splitModal = document.getElementById("ef-split-modal");
+    const splitCancel = document.getElementById("ef-split-cancel");
+    const splitDone = document.getElementById("ef-split-done");
+    
+    const categoryTrigger = document.getElementById("ef-category-trigger");
+    const categoryModal = document.getElementById("ef-category-modal");
+    const categoryClose = document.getElementById("ef-category-close");
+
+    // Split logic
+    let splitMode = "equal";
+    const modeTabs = document.querySelectorAll(".ef-split-tab");
+    const modeText = document.getElementById("ef-mode-label-text");
+    const splitModeLbl = document.getElementById("ef-split-mode-label");
+    const perPersonLbl = document.getElementById("ef-per-person-label");
+    const footerAll = document.getElementById("ef-footer-all");
+    const splitRows = document.querySelectorAll(".js-split-row");
+
+    // --- PAID BY ---
+    if (paidBySelect) {
+      paidBySelect.addEventListener("change", (e) => {
+        paidByDisplay.textContent = e.target.options[e.target.selectedIndex].text;
+      });
+    }
+
+    // --- DATE ---
+    if (dateInput) {
+      dateInput.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val) return;
+        const d = new Date(val + "T00:00:00");
+        const today = new Date(); today.setHours(0,0,0,0);
+        dateLabel.textContent = d.getTime() === today.getTime() ? "Today" : d.toLocaleDateString("en-US", {month:"short", day:"numeric"});
+      });
+    }
+
+    // --- NOTES ---
+    if (noteTrigger) {
+      noteTrigger.addEventListener("click", () => {
+        const isHidden = notePanel.style.display === "none";
+        notePanel.style.display = isHidden ? "block" : "none";
+        if (isHidden) noteInput.focus();
+      });
+    }
+
+    // --- CATEGORY ---
+    if (categoryTrigger) {
+      categoryTrigger.addEventListener("click", () => categoryModal.style.display = "flex");
+    }
+    if (categoryClose) {
+      categoryClose.addEventListener("click", () => categoryModal.style.display = "none");
+    }
+    document.querySelectorAll(".category-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        categoryInput.value = opt.dataset.value;
+        categoryIconDisp.textContent = opt.dataset.icon;
+        categoryModal.style.display = "none";
+      });
+    });
+
+    // --- SPLIT MODAL ---
+    if (splitTrigger) {
+      splitTrigger.addEventListener("click", () => {
+        calculateSplits();
+        splitModal.style.display = "flex";
+      });
+    }
+    if (splitCancel) splitCancel.addEventListener("click", () => splitModal.style.display = "none");
+    if (splitDone) {
+      splitDone.addEventListener("click", () => {
+        splitModal.style.display = "none";
+        const labels = { equal: "equally", exact: "by amount", percentage: "by %" };
+        splitModeLbl.textContent = labels[splitMode];
+      });
+    }
+
+    // --- SPLIT MODE TABS ---
+    modeTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        splitMode = tab.dataset.mode;
+        splitTypeField.value = splitMode;
+        modeTabs.forEach(t => t.classList.remove("ef-split-tab--active"));
+        tab.classList.add("ef-split-tab--active");
+
+        splitRows.forEach(row => {
+          row.querySelector(".equal-check").style.display = (splitMode === "equal") ? "flex" : "none";
+          row.querySelector(".exact-input").style.display = (splitMode === "equal") ? "none" : "block";
+        });
+
+        if (splitMode === "equal") {
+          modeText.innerHTML = "<strong>Split equally</strong><span>Select which people owe an equal share.</span>";
+          footerAll.style.display = "flex";
+        } else {
+          const label = splitMode === "exact" ? "Split by exact amounts" : "Split by percentages";
+          modeText.innerHTML = "<strong>" + label + "</strong><span>Enter the amount for each person.</span>";
+          footerAll.style.display = "none";
+        }
+        calculateSplits();
+      });
+    });
+
+    // --- SPLIT ROWS INTERACTION ---
+    splitRows.forEach(row => {
+      // Checkbox click
+      row.querySelector(".equal-check").addEventListener("click", function() {
+        this.classList.toggle("active");
+        calculateSplits();
+      });
+      // Exact/Percentage input typing
+      row.querySelector(".exact-input").addEventListener("input", calculateSplits);
+    });
+
+    // Footer 'All' button
+    if (footerAll) {
+      footerAll.addEventListener("click", () => {
+        const checks = Array.from(document.querySelectorAll(".equal-check"));
+        const allActive = checks.every(c => c.classList.contains("active"));
+        checks.forEach(c => allActive ? c.classList.remove("active") : c.classList.add("active"));
+        calculateSplits();
+      });
+    }
+
+    // --- CALCULATION LOGIC ---
+    function calculateSplits() {
+      const totalRaw = parseFloat(totalInput.value) || 0;
+      const totalCents = Math.round(totalRaw * 100);
+
+      if (splitMode === "equal") {
+        const activeChecks = Array.from(document.querySelectorAll(".equal-check.active"));
+        const count = activeChecks.length || 1;
+        perPersonLbl.textContent = "PKR " + (totalRaw / count).toFixed(2) + "/person (" + count + " people)";
+
+        if (activeChecks.length > 0) {
+          const share = Math.floor(totalCents / activeChecks.length);
+          const remainder = totalCents - (share * activeChecks.length);
+
+          splitRows.forEach((row, index) => {
+            const isActive = row.querySelector(".equal-check").classList.contains("active");
+            const hidden = document.getElementById("split_cents_" + row.dataset.index);
+            if (hidden) {
+              hidden.value = isActive ? share + (row === activeChecks[0].closest(".js-split-row") ? remainder : 0) : 0;
+            }
+          });
+        }
+      } else {
+        perPersonLbl.textContent = "Total: PKR " + totalRaw.toFixed(2);
+        splitRows.forEach(row => {
+          let val = parseFloat(row.querySelector(".exact-input").value) || 0;
+          if (splitMode === "percentage") val = totalRaw * val / 100;
+          const hidden = document.getElementById("split_cents_" + row.dataset.index);
+          if (hidden) hidden.value = Math.round(val * 100);
+        });
+      }
+    }
+
+    // Recalculate when total amount changes
+    if (totalInput) totalInput.addEventListener("input", calculateSplits);
+
+    // --- FORM SUBMIT VALIDATION ---
+    form.addEventListener("submit", (e) => {
+      const totalRaw = parseFloat(totalInput.value) || 0;
+      const totalCents = Math.round(totalRaw * 100);
+
+      if (totalRaw <= 0) {
+        e.preventDefault();
+        alert("Please enter an amount greater than 0.");
+        return;
+      }
+
+      if (splitMode !== "equal") {
+        let sumCents = 0;
+        document.querySelectorAll(".split-cents-hidden").forEach(input => {
+          sumCents += parseInt(input.value) || 0;
+        });
+
+        if (Math.abs(sumCents - totalCents) > 1) { // 1-cent tolerance
+          e.preventDefault();
+          const label = splitMode === "percentage"
+            ? "Percentages must add up to 100%. Currently: " + ((sumCents / totalCents) * 100).toFixed(1) + "%"
+            : "Amounts (" + (sumCents / 100).toFixed(2) + ") don't match total (" + totalRaw.toFixed(2) + ")";
+          alert(label);
+          return;
+        }
+      }
+    });
+
+    // Initial calculation run
+    calculateSplits();
+  };
+
+  runSetup();
+})();
+</script>
