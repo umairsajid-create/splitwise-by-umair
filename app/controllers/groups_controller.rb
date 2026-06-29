@@ -1,7 +1,7 @@
 
 class GroupsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_group, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_group, only: [ :show, :edit, :update, :delete, :destroy ]
 
   # GET /groups
   def index
@@ -67,11 +67,21 @@ class GroupsController < ApplicationController
     end
   end
 
+  # GET /groups/:id/delete
+  def delete
+    authorize! :destroy, @group
+    @balances           = Groups::BalanceService.new(@group).call
+    @unsettled_balances = Groups::DeleteService.unsettled_balances(@group)
+    @can_delete         = @unsettled_balances.empty?
+  end
+
   # DELETE /groups/:id
   def destroy
     authorize! :destroy, @group
-    @group.archive!
-    redirect_to groups_path, notice: "Group archived."
+    group_name = Groups::DeleteService.new(group: @group).call
+    redirect_to groups_path, notice: "Group \"#{group_name}\" was deleted."
+  rescue Groups::DeleteService::Error => e
+    redirect_to delete_group_path(@group), alert: e.message
   end
 
   private

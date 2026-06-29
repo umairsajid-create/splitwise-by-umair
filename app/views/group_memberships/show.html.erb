@@ -1,0 +1,61 @@
+<% content_for :title, "Leave #{@group.name}" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Leave group", back_path: group_path(@group) %>
+<% end %>
+
+<% currency = current_user.default_currency.presence || "PKR" %>
+<% amount = number_to_currency(@my_balance_cents.abs / 100.0, unit: currency + " ", precision: 2) %>
+<% balance_state = @my_balance_cents.positive? ? "owed" : (@my_balance_cents.negative? ? "owe" : "settled") %>
+
+<div class="leave-page animate-fade-in">
+  <div class="leave-page__inner">
+
+    <div class="leave-page__header">
+      <div class="leave-page__avatar"><%= @group.name.first.upcase %></div>
+      <h1 class="leave-page__title">Leave <%= @group.name %>?</h1>
+      <p class="leave-page__subtitle">
+        You will no longer see expenses or balances for this group.
+      </p>
+    </div>
+
+    <div class="leave-page__balance leave-page__balance--<%= balance_state %>">
+      <div class="leave-page__balance-label">Your balance in this group</div>
+
+      <% if @my_balance_cents.zero? %>
+        <div class="leave-page__balance-amount">All settled up</div>
+        <p class="leave-page__balance-message">You have no outstanding expenses in this group. You can leave safely.</p>
+      <% elsif @my_balance_cents.positive? %>
+        <div class="leave-page__balance-amount">+<%= amount %></div>
+        <p class="leave-page__balance-message">Other members still owe you this amount. Settle up before you can leave.</p>
+      <% else %>
+        <div class="leave-page__balance-amount">−<%= amount %></div>
+        <p class="leave-page__balance-message">You still owe this amount to other members. Settle up before you can leave.</p>
+      <% end %>
+    </div>
+
+    <% if @sole_admin_block %>
+      <div class="leave-page__alert">
+        <strong>Only admin</strong>
+        <p>You are the only admin in this group. Promote another member to admin before you can leave.</p>
+      </div>
+    <% end %>
+
+    <div class="leave-page__actions">
+      <% if @can_leave %>
+        <%= button_to "Leave group",
+              group_membership_path(@group),
+              method: :delete,
+              form: { data: { turbo_confirm: "Leave \"#{@group.name}\"? You can only rejoin if someone invites you again." } },
+              class: "btn btn--danger btn--block btn--lg" %>
+        <%= link_to "Cancel", group_path(@group), class: "btn btn--outline btn--block btn--lg" %>
+      <% else %>
+        <% if @my_balance_cents != 0 %>
+          <%= link_to "Settle up", new_group_settlement_path(@group), class: "btn btn--primary btn--block btn--lg" %>
+        <% end %>
+        <%= link_to "Back to group", group_path(@group), class: "btn btn--outline btn--block btn--lg" %>
+      <% end %>
+    </div>
+
+  </div>
+</div>

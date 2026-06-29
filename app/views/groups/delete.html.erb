@@ -1,0 +1,70 @@
+<% content_for :title, "Delete #{@group.name}" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Delete group", back_path: edit_group_path(@group) %>
+<% end %>
+
+<% currency = current_user.default_currency.presence || "PKR" %>
+
+<div class="leave-page animate-fade-in">
+  <div class="leave-page__inner">
+
+    <div class="leave-page__header">
+      <div class="leave-page__avatar"><%= @group.name.first.upcase %></div>
+      <h1 class="leave-page__title">Delete <%= @group.name %>?</h1>
+      <p class="leave-page__subtitle">
+        This permanently removes the group, all expenses, and member links. This cannot be undone.
+      </p>
+    </div>
+
+    <% if @can_delete %>
+      <div class="leave-page__balance leave-page__balance--settled">
+        <div class="leave-page__balance-label">Group balances</div>
+        <div class="leave-page__balance-amount">All settled up</div>
+        <p class="leave-page__balance-message">Every member has a zero balance. You can delete this group.</p>
+      </div>
+    <% else %>
+      <div class="leave-page__balance leave-page__balance--owe">
+        <div class="leave-page__balance-label">Unsettled balances</div>
+        <div class="leave-page__balance-amount"><%= @unsettled_balances.size %> member<%= @unsettled_balances.size == 1 ? "" : "s" %></div>
+        <p class="leave-page__balance-message">This group cannot be deleted until everyone has settled up.</p>
+      </div>
+
+      <div class="card card--shadow">
+        <% @unsettled_balances.each do |entry| %>
+          <% amount = number_to_currency(entry[:balance_cents].abs / 100.0, unit: currency + " ", precision: 2) %>
+          <div class="list-item">
+            <div class="avatar avatar--sm avatar--teal">
+              <%= entry[:user].username.first.upcase %>
+            </div>
+            <div class="list-item__body">
+              <div class="list-item__title"><%= entry[:user].username %></div>
+              <div class="list-item__subtitle">
+                <% if entry[:balance_cents].positive? %>
+                  is owed <%= amount %>
+                <% else %>
+                  owes <%= amount %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="leave-page__actions">
+      <% if @can_delete %>
+        <%= button_to "Delete group",
+              group_path(@group),
+              method: :delete,
+              form: { data: { turbo_confirm: "Permanently delete \"#{@group.name}\"? This cannot be undone." } },
+              class: "btn btn--danger btn--block btn--lg" %>
+        <%= link_to "Cancel", edit_group_path(@group), class: "btn btn--outline btn--block btn--lg" %>
+      <% else %>
+        <%= link_to "Settle up", new_group_settlement_path(@group), class: "btn btn--primary btn--block btn--lg" %>
+        <%= link_to "Back to group", group_path(@group), class: "btn btn--outline btn--block btn--lg" %>
+      <% end %>
+    </div>
+
+  </div>
+</div>

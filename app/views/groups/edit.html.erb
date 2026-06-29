@@ -13,16 +13,13 @@
     <% content_for :submit_label, "Save Changes" %>
     <%= render "form", group: @group %>
 
-    <%# Danger zone — Archive / Delete %>
-    <div class="danger-zone">
-      <div class="danger-zone__label">Danger Zone</div>
-      <%= link_to group_path(@group),
-            method: :delete,
-            data: { confirm: "Archive \"#{@group.name}\"? This will hide it from your groups list." },
-            class: "btn btn--danger btn--sm btn--block" do %>
-        Archive Group
-      <% end %>
-    </div>
+    <% if can? :destroy, @group %>
+      <div class="danger-zone">
+        <div class="danger-zone__label">Danger Zone</div>
+        <p class="text-muted text-sm mb-sm">Permanently delete this group. Only allowed when all members are settled up.</p>
+        <%= link_to "Delete Group", delete_group_path(@group), class: "btn btn--danger btn--sm btn--block" %>
+      </div>
+    <% end %>
   </div>
 
   <div class="spacer--lg"></div>

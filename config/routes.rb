@@ -19,10 +19,14 @@ Rails.application.routes.draw do
   # Groups (stub — full implementation in Branch 4)
   # ─────────────────────────────────────────
   resources :groups do
+    member do
+      get :delete
+    end
     resources :expenses, except: [ :index ]
     resources :settlements, only: [ :new, :create ]
     resources :invitations, only: [ :new, :create ]
     resources :group_members, only: [ :destroy ]
+    resource :membership, only: [ :show, :destroy ], controller: "group_memberships"
   end
 
   # ─────────────────────────────────────────
