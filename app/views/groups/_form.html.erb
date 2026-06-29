@@ -45,9 +45,9 @@
   </div>
 
   <%# Submit %>
+  <% submit_label = content_for?(:submit_label) ? content_for(:submit_label) : "Save Group" %>
   <div class="mt-lg">
-    <%= f.submit yield(:submit_label) { "Save Group" },
-          class: "btn btn--primary btn--block btn--lg" %>
+    <%= f.submit submit_label, class: "btn btn--primary btn--block btn--lg" %>
   </div>
 
 <% end %>

@@ -12,7 +12,8 @@ class GroupsController < ApplicationController
   # GET /groups/:id
   def show
     authorize! :read, @group
-    @members  = @group.group_members.includes(:user)
+    @members             = @group.group_members.includes(:user)
+    @pending_invitations = @group.invitations.active.order(created_at: :desc)
     @expenses = @group.expenses.active
                       .where(record_type: :expense)
                       .order(expense_date: :desc)

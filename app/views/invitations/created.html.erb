@@ -1,0 +1,53 @@
+<% content_for :title, "Invitation sent — #{@group.name}" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Invitation sent", back_path: group_path(@group) %>
+<% end %>
+
+<div class="animate-fade-in ef-page-wrap">
+  <div class="card card--shadow p-lg mt-md" style="max-width: 560px; margin-left: auto; margin-right: auto;">
+    <div class="text-center mb-md">
+      <div class="avatar avatar--lg avatar--teal mx-auto mb-sm">✓</div>
+      <h2 class="fw-bold mb-xs">Invitation created</h2>
+      <p class="text-muted text-sm">
+        Email is not set up yet, so copy this link and send it to
+        <strong><%= @invitation.email %></strong>.
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Invite link</label>
+      <div class="d-flex gap-sm">
+        <input type="text"
+               id="invite-link"
+               class="form-control"
+               value="<%= @invite_link %>"
+               readonly>
+        <button type="button"
+                class="btn btn--outline"
+                onclick="copyInviteLink()">
+          Copy
+        </button>
+      </div>
+      <p class="text-muted text-sm mt-sm" id="copy-feedback" style="display: none;">Link copied!</p>
+    </div>
+
+    <div class="mt-lg d-flex gap-sm">
+      <%= link_to "Back to group", group_path(@group), class: "btn btn--primary flex-1" %>
+      <%= link_to "Invite another", new_group_invitation_path(@group), class: "btn btn--outline flex-1" %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyInviteLink() {
+    const input = document.getElementById("invite-link");
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value).then(function() {
+      const feedback = document.getElementById("copy-feedback");
+      feedback.style.display = "block";
+      setTimeout(function() { feedback.style.display = "none"; }, 2000);
+    });
+  }
+</script>

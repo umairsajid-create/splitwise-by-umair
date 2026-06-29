@@ -7,17 +7,6 @@
 
 <div class="animate-fade-in">
 
-  <%# Upgrade notice for simple users — CanCanCan will block at controller too %>
-  <% unless can? :create, Group %>
-    <div class="upgrade-banner">
-      <span class="upgrade-banner__icon">⭐</span>
-      <div>
-        <div class="upgrade-banner__title">Premium Feature</div>
-        <div class="upgrade-banner__body">Upgrade to Premium to create unlimited groups.</div>
-      </div>
-    </div>
-  <% end %>
-
   <div class="auth-card" style="max-width: 560px; margin: 0 auto;">
     <h2 class="auth-card__title">New Group</h2>
     <p class="auth-card__subtitle">Give your group a name and pick a type</p>

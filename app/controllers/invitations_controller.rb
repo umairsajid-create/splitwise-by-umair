@@ -19,16 +19,14 @@ class InvitationsController < ApplicationController
       return
     end
 
-    invitation = Invitations::SendService.new(
+    @invitation = Invitations::SendService.new(
       group:      @group,
       invited_by: current_user,
       email:      params[:email]
     ).call
 
-    # We will simulate the email being sent for now by flashing the link
-    link = accept_invitation_url(token: invitation.token)
-    
-    redirect_to @group, notice: "Invitation created! (Since email is disabled, send them this link: #{link})"
+    @invite_link = accept_invitation_url(token: @invitation.token)
+    render :created
   end
 
   # GET /invitations/:token/accept
@@ -43,7 +41,8 @@ class InvitationsController < ApplicationController
     else
       # If not logged in, force login/signup, then redirect back here
       store_location_for(:user, request.fullpath)
-      redirect_to new_user_registration_path, notice: "Please sign up or log in to accept the invitation."
+      redirect_to new_user_session_path,
+                  notice: "Please log in to accept the invitation. Don't have an account? Sign up first, then open the invite link again."
     end
   end
 

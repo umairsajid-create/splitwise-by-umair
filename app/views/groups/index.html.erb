@@ -90,13 +90,7 @@
       <p class="empty-state__body">
         Groups let you share expenses with roommates, friends, or travel buddies.
       </p>
-      <% if can? :create, Group %>
-        <%= link_to "Create your first group", new_group_path, class: "btn btn--primary" %>
-      <% else %>
-        <p class="text-muted" style="font-size: var(--font-size-sm);">
-          Ask a friend to invite you to a group, or upgrade to Premium to create your own.
-        </p>
-      <% end %>
+      <%= link_to "Create your first group", new_group_path, class: "btn btn--primary" %>
     </div>
   <% end %>
 

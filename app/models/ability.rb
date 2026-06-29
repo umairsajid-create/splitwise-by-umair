@@ -12,10 +12,10 @@ class Ability
     can :read,    Group, group_members: { user_id: user.id }
     can :update,  Group, group_members: { user_id: user.id, role: :admin }
     can :destroy, Group, creator_id: user.id
+    can :create,  Group
 
     # PREMIUM + ADMIN users only
     if user.premium_or_admin?
-      can :create,        Group
       can :view_charts,   Group
       can :export,        Group
       can :send_reminder, User
