@@ -122,6 +122,15 @@ GEM
     dotenv (3.2.0)
     drb (2.2.3)
     ed25519 (1.4.0)
+    elastic-transport (8.5.3)
+      faraday (< 3)
+      multi_json
+    elasticsearch (8.19.3)
+      elastic-transport (~> 8.3)
+      elasticsearch-api (= 8.19.3)
+      ostruct
+    elasticsearch-api (8.19.3)
+      multi_json
     erb (6.0.4)
     erubi (1.13.1)
     factory_bot (6.6.0)
@@ -131,6 +140,12 @@ GEM
       railties (>= 6.1.0)
     faker (3.8.0)
       i18n (>= 1.8.11, < 2)
+    faraday (2.14.3)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-net_http (3.4.4)
+      net-http (~> 0.5)
     ffi (1.17.4-aarch64-linux-gnu)
     ffi (1.17.4-aarch64-linux-musl)
     ffi (1.17.4-arm-linux-gnu)
@@ -140,6 +155,8 @@ GEM
     ffi (1.17.4-x86_64-linux-musl)
     globalid (1.4.0)
       activesupport (>= 6.1)
+    hashie (5.1.0)
+      logger
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     image_processing (1.14.0)
@@ -191,6 +208,9 @@ GEM
       drb (~> 2.0)
       prism (~> 1.5)
     msgpack (1.8.3)
+    multi_json (1.21.1)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     net-imap (0.6.4.1)
       date
       net-protocol
@@ -352,6 +372,9 @@ GEM
       ffi (~> 1.12)
       logger
     rubyzip (3.4.0)
+    searchkick (5.5.2)
+      activemodel (>= 7.1)
+      hashie
     securerandom (0.4.1)
     selenium-webdriver (4.45.0)
       base64 (~> 0.2)
@@ -430,6 +453,7 @@ DEPENDENCIES
   database_cleaner-active_record (~> 2.2)
   debug
   devise (~> 4.9)
+  elasticsearch (~> 8.12)
   factory_bot_rails (~> 6.4)
   faker (~> 3.5)
   image_processing (~> 1.2)
@@ -443,6 +467,7 @@ DEPENDENCIES
   redis (~> 5.3)
   rspec-rails (~> 7.1)
   rubocop-rails-omakase
+  searchkick (~> 5.3)
   selenium-webdriver
   shoulda-matchers (~> 6.4)
   sidekiq (~> 8.0)

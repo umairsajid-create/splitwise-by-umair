@@ -11,13 +11,49 @@
 <div class="animate-fade-in">
   <h1 class="page-heading mb-md d-none-mobile">Recent Activity</h1>
 
+  <div class="activity-search mb-md">
+    <%= form_with url: activity_path, method: :get, local: true, class: "activity-search__form" do %>
+      <div class="activity-search__field">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="activity-search__icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <%= text_field_tag :q, @query,
+              placeholder: "Search expenses, notes, groups...",
+              class: "activity-search__input",
+              autocomplete: "off" %>
+      </div>
+      <%= submit_tag "Search", class: "btn btn--primary btn--sm activity-search__submit" %>
+      <% if @query.present? %>
+        <%= link_to "Clear", activity_path, class: "btn btn--outline btn--sm activity-search__clear" %>
+      <% end %>
+    <% end %>
+
+    <% if @query.present? %>
+      <p class="activity-search__meta text-muted text-sm mt-xs">
+        <% if @using_elasticsearch %>
+          Showing Elasticsearch results for “<%= @query %>”
+        <% else %>
+          Showing results for “<%= @query %>”
+          <% unless @can_use_elasticsearch %>
+            · <span class="text-muted">Upgrade to Premium for full-text search</span>
+          <% end %>
+        <% end %>
+      </p>
+    <% elsif @can_use_elasticsearch %>
+      <p class="activity-search__meta text-muted text-sm mt-xs">Premium full-text search is enabled.</p>
+    <% end %>
+  </div>
+
   <% if @activities.empty? %>
     <div class="card p-xl text-center mt-md">
       <div class="avatar avatar--xl avatar--teal mx-auto mb-md" style="background: var(--bg-surface-2); color: var(--text-muted);">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
       </div>
-      <h3 class="fw-bold mb-xs">No activity yet!</h3>
-      <p class="text-muted text-sm">Activities from your groups will appear here.</p>
+      <% if @query.present? %>
+        <h3 class="fw-bold mb-xs">No results found</h3>
+        <p class="text-muted text-sm">Nothing matched “<%= @query %>”. Try another keyword.</p>
+      <% else %>
+        <h3 class="fw-bold mb-xs">No activity yet!</h3>
+        <p class="text-muted text-sm">Activities from your groups will appear here.</p>
+      <% end %>
     </div>
   <% else %>
     <div class="card card--shadow">
@@ -28,7 +64,7 @@
                   utilities: "💡", rent: "🏠", shopping: "🛍️",
                   healthcare: "💊", other: "📦" }[activity.category.to_sym] || "🧾" %>
           </div>
-          
+
           <div class="list-item__body">
             <div class="list-item__title text-primary"><%= activity.title %></div>
             <div class="list-item__subtitle">
@@ -39,7 +75,7 @@
               <% end %>
             </div>
           </div>
-          
+
           <div class="list-item__meta text-right">
             <div class="text-sm fw-bold">
               <%= number_to_currency(activity.total_amount_cents / 100.0, unit: activity.currency + " ") %>

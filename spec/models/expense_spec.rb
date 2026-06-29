@@ -19,7 +19,7 @@ RSpec.describe Expense, type: :model do
   end
 
   describe "enums" do
-    it { should define_enum_for(:record_type).with_values(expense: 0, settlement: 1) }
+    it { should define_enum_for(:record_type).with_values(expense: 0, settlement: 1).with_prefix(true) }
     it { should define_enum_for(:split_type).with_values(equal: 0, exact: 1, percentage: 2, adjustment: 3) }
     it { should define_enum_for(:status).with_values(active: 0, deleted: 1, updated: 2) }
   end

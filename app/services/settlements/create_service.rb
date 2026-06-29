@@ -51,6 +51,8 @@ module Settlements
       end
 
       settlement
+    ensure
+      Expense.reindex_async(settlement) if settlement&.persisted?
     end
 
     private

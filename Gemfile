@@ -50,6 +50,10 @@ gem "devise", "~> 4.9"
 # Authorization (role-based access control)
 gem "cancancan", "~> 3.6"
 
+# Full-text search (Activity + expenses)
+gem "searchkick", "~> 5.3"
+gem "elasticsearch", "~> 8.12"
+
 # Password hashing (Devise dependency)
 gem "bcrypt", "~> 3.1"
 

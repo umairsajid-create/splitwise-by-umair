@@ -24,6 +24,8 @@ module Expenses
     rescue ActiveRecord::RecordInvalid => e
       expense.errors.add(:base, e.message)
       expense
+    ensure
+      Expense.reindex_async(expense) if expense&.persisted?
     end
 
     private

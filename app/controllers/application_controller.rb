@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
+  include CanCan::ControllerAdditions
+
   # ============================================
   # Require login for ALL pages by default
   # (individual controllers can skip with: skip_before_action :authenticate_user!)
@@ -27,5 +29,9 @@ class ApplicationController < ActionController::Base
 
   def after_sign_out_path_for(resource_or_scope)
     new_user_session_path
+  end
+
+  def current_ability
+    @current_ability ||= Ability.new(current_user)
   end
 end
