@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 class GroupsController < ApplicationController
   before_action :authenticate_user!
@@ -25,7 +24,6 @@ class GroupsController < ApplicationController
 
     # Per-member breakdown: what I owe to each person / what each owes me
     # We compute bilateral net between current_user and every other member
-    service = Groups::BalanceService.new(@group)
     @my_balance_detail = @balances.reject { |b| b[:user] == current_user }.map do |entry|
       other = entry[:user]
       # Net = what other paid for me minus what I paid for them

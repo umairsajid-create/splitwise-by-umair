@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 module Balances
   class DashboardSummaryService
@@ -6,8 +5,6 @@ module Balances
       @user = user
     end
 
-    # Returns gross owe/owed totals across all groups (Splitwise-style).
-    # Net total matches user.balance_cents.
     def call
       you_are_owed_cents = 0
       you_owe_cents      = 0
