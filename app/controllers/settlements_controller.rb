@@ -18,12 +18,13 @@ class SettlementsController < ApplicationController
   def create
     receiver = User.find(params[:receiver_id])
 
-    Settlements::CreateService.new(
+    settlement = Settlements::CreateService.new(
       group:        @group,
       payer:        current_user,
       receiver:     receiver,
       amount_cents: (params[:amount].to_f * 100).to_i,
-      currency:     params[:currency] || current_user.default_currency
+      currency:     params[:currency] || current_user.default_currency,
+      proof:        params[:proof]
     ).call
 
     redirect_to @group, notice: "Settlement recorded!"

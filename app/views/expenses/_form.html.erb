@@ -1,5 +1,6 @@
 <%# Expense Form — Plain Vanilla JS, No Frameworks %>
 <%= form_with model: [@group, @expense], local: true,
+      multipart: true,
       class: "expense-form", id: "expense-form",
       data: { turbo: false } do |f| %>
 
@@ -86,7 +87,19 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       <span>Notes</span>
     </button>
+
+    <label class="ef-toolbar-btn" style="cursor:pointer; position:relative;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span id="ef-proof-label">Receipt</span>
+      <%= f.file_field :proof,
+            accept: "image/*,.pdf",
+            class: "ef-file-input",
+            id: "expense_proof_input",
+            onchange: "document.getElementById('ef-proof-label').textContent = this.files[0] ? this.files[0].name : 'Receipt';" %>
+    </label>
   </div>
+
+  <div id="ef-proof-preview" class="ef-attachment-preview" style="display:none;"></div>
 
   <%# Note panel %>
   <div id="ef-note-panel" style="display:none; padding: 0 var(--ef-side-pad) var(--space-md);">
@@ -264,6 +277,30 @@
         const d = new Date(val + "T00:00:00");
         const today = new Date(); today.setHours(0,0,0,0);
         dateLabel.textContent = d.getTime() === today.getTime() ? "Today" : d.toLocaleDateString("en-US", {month:"short", day:"numeric"});
+      });
+    }
+
+    // --- RECEIPT PREVIEW ---
+    const proofInput = document.getElementById("expense_proof_input");
+    const proofPreview = document.getElementById("ef-proof-preview");
+    if (proofInput && proofPreview) {
+      proofInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+          proofPreview.style.display = "none";
+          proofPreview.innerHTML = "";
+          return;
+        }
+        proofPreview.style.display = "block";
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            proofPreview.innerHTML = '<img src="' + ev.target.result + '" alt="Receipt preview" class="ef-attachment-preview__image">';
+          };
+          reader.readAsDataURL(file);
+        } else {
+          proofPreview.innerHTML = '<div class="ef-attachment-preview__file">' + file.name + '</div>';
+        }
       });
     }
 

@@ -2,12 +2,13 @@
 
 module Settlements
   class CreateService
-    def initialize(group:, payer:, receiver:, amount_cents:, currency:)
+    def initialize(group:, payer:, receiver:, amount_cents:, currency:, proof: nil)
       @group        = group
       @payer        = payer
       @receiver     = receiver
       @amount_cents = amount_cents
       @currency     = currency
+      @proof        = proof
     end
 
     def call
@@ -40,6 +41,8 @@ module Settlements
           paid_amount_cents:  0,
           owed_amount_cents:  @amount_cents
         )
+
+        settlement.proof.attach(@proof) if @proof.present?
 
         # Recalculate both users' balances
         Balances::RecalculateService.new(@payer).call

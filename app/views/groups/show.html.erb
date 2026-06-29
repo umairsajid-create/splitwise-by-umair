@@ -243,7 +243,11 @@
       <% @members.each do |gm| %>
         <div class="list-item">
           <div class="avatar avatar--sm avatar--teal">
-            <%= gm.user.username.first.upcase %>
+            <% if gm.user.avatar.attached? %>
+              <%= image_tag gm.user.avatar, alt: gm.user.username %>
+            <% else %>
+              <%= gm.user.username.first.upcase %>
+            <% end %>
           </div>
           <div class="list-item__body">
             <div class="list-item__title"><%= gm.user.username %></div>

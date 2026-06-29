@@ -20,7 +20,7 @@
     </div>
   <% else %>
 
-    <%= form_with url: group_settlements_path(@group), local: true, class: "expense-form mt-md" do |f| %>
+    <%= form_with url: group_settlements_path(@group), local: true, multipart: true, class: "expense-form mt-md" do |f| %>
       
       <div class="card card--shadow p-md mb-md text-center">
         <div class="d-flex align-center justify-center gap-md mb-lg mt-sm">
@@ -55,6 +55,21 @@
         </div>
       </div>
 
+      <div class="card card--shadow p-md mb-md">
+        <div class="form-group mb-0">
+          <label class="form-label">Payment proof (optional)</label>
+          <p class="text-muted text-sm mb-sm">Upload a screenshot or photo of the payment.</p>
+          <input type="file"
+                 name="proof"
+                 accept="image/*,.pdf"
+                 class="form-control"
+                 id="settlement-proof-input"
+                 onchange="document.getElementById('settlement-proof-name').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+          <p class="text-muted text-sm mt-xs" id="settlement-proof-name">No file chosen</p>
+        </div>
+        <div id="settlement-proof-preview" class="ef-attachment-preview mt-sm" style="display:none;"></div>
+      </div>
+
       <div class="ef-save-bar">
         <%= f.submit "Save", class: "btn btn--primary btn--block btn--lg", id: "settlement-submit" %>
       </div>
@@ -81,6 +96,29 @@
               avatar.style.background = "var(--bg-surface-2)";
               avatar.style.color = "var(--text-muted)";
               avatar.style.border = "2px dashed var(--border-color)";
+            }
+          });
+        }
+
+        const proofInput = document.getElementById("settlement-proof-input");
+        const proofPreview = document.getElementById("settlement-proof-preview");
+        if (proofInput && proofPreview) {
+          proofInput.addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+              proofPreview.style.display = "none";
+              proofPreview.innerHTML = "";
+              return;
+            }
+            proofPreview.style.display = "block";
+            if (file.type.startsWith("image/")) {
+              const reader = new FileReader();
+              reader.onload = function(ev) {
+                proofPreview.innerHTML = '<img src="' + ev.target.result + '" alt="Payment proof" class="ef-attachment-preview__image">';
+              };
+              reader.readAsDataURL(file);
+            } else {
+              proofPreview.innerHTML = '<div class="ef-attachment-preview__file">' + file.name + '</div>';
             }
           });
         }

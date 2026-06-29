@@ -1462,6 +1462,104 @@ textarea.form-control {
   height: 0;
 }
 
+.ef-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.ef-attachment-preview {
+  padding: 0 var(--ef-side-pad) var(--space-md);
+}
+
+.ef-attachment-preview__image {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  object-fit: contain;
+  background: var(--bg-surface-2);
+}
+
+.ef-attachment-preview__file {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* ── ATTACHMENT UPLOAD (avatars, profile) ─────────────────── */
+.attachment-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.attachment-upload__preview {
+  display: flex;
+  justify-content: center;
+}
+
+.attachment-upload__image {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  background: var(--bg-surface-2);
+}
+
+.attachment-upload__file {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+}
+
+.attachment-upload__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--border-radius-md);
+  background: var(--bg-surface-2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.attachment-upload__trigger:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.attachment-upload__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.attachment-upload__hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
 /* Save button bar (mobile) */
 .ef-save-bar { display: none; } /* hidden — uses top bar label instead */
 .ef-save-btn {

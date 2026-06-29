@@ -37,6 +37,19 @@
       </div>
     <% end %>
 
+    <% if @expense.proof.attached? %>
+      <div class="mt-md text-left">
+        <div class="text-muted text-sm mb-xs">Receipt / proof</div>
+        <% if @expense.proof.content_type&.start_with?("image/") %>
+          <%= link_to url_for(@expense.proof), target: "_blank", rel: "noopener" do %>
+            <%= image_tag @expense.proof, class: "ef-attachment-preview__image", alt: "Expense receipt" %>
+          <% end %>
+        <% else %>
+          <%= link_to "View attachment", url_for(@expense.proof), target: "_blank", rel: "noopener", class: "btn btn--outline btn--sm" %>
+        <% end %>
+      </div>
+    <% end %>
+
     <%# Delete Action — using button_to (renders a form) so it always works %>
     <div class="mt-md pt-md border-top text-right">
       <%= button_to group_expense_path(@group, @expense),
