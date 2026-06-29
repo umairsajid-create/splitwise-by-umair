@@ -18,7 +18,6 @@ module Invitations
       if invitation.accepted?
         raise "This invitation has already been accepted."
       end
-
       GroupInvitation.transaction do
         invitation.group.group_members.find_or_create_by!(user: @user) do |gm|
           gm.invited_by = invitation.invited_by

@@ -4,7 +4,7 @@ class GroupMembershipsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_group
 
-  # GET /groups/:group_id/membership
+  # if user wanna leave group
   def show
     @my_balance_cents = Groups::LeaveService.member_balance_cents(@group, current_user)
     @membership       = @group.group_members.find_by(user: current_user)
@@ -21,7 +21,7 @@ class GroupMembershipsController < ApplicationController
     @can_leave = @my_balance_cents.zero? && !@sole_admin_block
   end
 
-  # DELETE /groups/:group_id/membership
+  # user leave group
   def destroy
     Groups::LeaveService.new(group: @group, user: current_user).call
     redirect_to groups_path, notice: "You have left \"#{@group.name}\"."

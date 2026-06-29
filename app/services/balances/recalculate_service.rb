@@ -6,9 +6,7 @@ module Balances
       @user = user
     end
 
-    # Recalculates the user's global balance_cents from scratch.
-    # IMPORTANT: We JOIN on expenses table and filter status = 0 (active)
-    # so that soft-deleted expenses are fully excluded from balances.
+    # tell user balance
     def call
       total = @user.expense_splits
                    .joins(:expense)

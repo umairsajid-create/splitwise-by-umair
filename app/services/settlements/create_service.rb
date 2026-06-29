@@ -68,7 +68,7 @@ module Settlements
         body:              "#{@payer.username} paid #{@receiver.username} #{settlement.total_amount_cents / 100.0} #{settlement.currency}"
       )
 
-      # Recipients: all members of the group except the payer
+      # all members of the group except the payer
       recipients = @group.members.where.not(id: @payer.id)
       recipients.each do |recipient|
         notification.notification_recipients.create!(recipient: recipient)

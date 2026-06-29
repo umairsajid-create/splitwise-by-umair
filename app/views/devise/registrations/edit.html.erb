@@ -104,7 +104,14 @@
                 placeholder: "Same new password again" %>
         </div>
 
-        <p class="form-hint mt-xs">Note: You do not need your current password to save changes.</p>
+        <div class="form-group" style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border-color);">
+          <%= f.label :current_password, "Current password", class: "form-label" %>
+          <%= f.password_field :current_password,
+                autocomplete: "current-password",
+                class: "form-control",
+                placeholder: "We need your current password to confirm your changes" %>
+          <p class="form-hint mt-xs">Required only if you are changing your password or email.</p>
+        </div>
 
       </div>
     </div>

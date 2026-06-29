@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
   root "dashboard#index"
 
+  # all routes happen under groups/ as groups is the main entity
   resources :groups do
     member do
       get :delete
@@ -31,6 +32,7 @@ Rails.application.routes.draw do
 
   resource :profile, only: [ :show, :edit, :update ]
 
+  # admin routes where it see analytics and control user
   namespace :admin do
     root to: "analytics#index"
     get "analytics", to: "analytics#index"

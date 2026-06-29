@@ -6,8 +6,7 @@ module Groups
       @group = group
     end
 
-    # Returns array sorted by balance: biggest owed first
-    # Each element: { user: User, balance_cents: Integer }
+    # Returns array desc sorted by balance
     def call
       @group.group_members.includes(:user).map do |member|
         {
@@ -20,7 +19,7 @@ module Groups
     private
 
     def calculate_member_balance(user)
-      # Only count splits from ACTIVE expenses (status = 0)
+      # status = 0 mean active
       @group.expenses
             .where(status: 0)
             .joins(:expense_splits)

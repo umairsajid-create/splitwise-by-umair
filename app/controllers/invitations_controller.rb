@@ -3,13 +3,11 @@
 class InvitationsController < ApplicationController
   before_action :authenticate_user!, except: [ :accept, :confirm ]
 
-  # GET /groups/:group_id/invitations/new
   def new
     @group      = current_user.groups.find(params[:group_id])
     @invitation = GroupInvitation.new
   end
 
-  # POST /groups/:group_id/invitations
   def create
     @group = current_user.groups.find(params[:group_id])
     # Can only invite if you are a member
@@ -29,22 +27,20 @@ class InvitationsController < ApplicationController
     redirect_to @group, notice: "Invitation created! (Since email is disabled, send them this link: #{link})"
   end
 
-  # GET /invitations/:token/accept
   def accept
     @invitation = GroupInvitation.find_by!(token: params[:token])
     if @invitation.expired? || @invitation.accepted?
       redirect_to root_path, alert: "This invitation is invalid or has expired."
     elsif user_signed_in?
-      # If logged in, show confirm screen
+      # if logged in, show confirm screen
       render :accept
     else
-      # If not logged in, force login/signup, then redirect back here
+      # force login/signup, then redirect back here
       store_location_for(:user, request.fullpath)
       redirect_to new_user_registration_path, notice: "Please sign up or log in to accept the invitation."
     end
   end
 
-  # POST /invitations/:token/confirm
   def confirm
     authenticate_user!
     begin

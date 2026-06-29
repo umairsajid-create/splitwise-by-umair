@@ -3,12 +3,10 @@ class GroupsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_group, only: [ :show, :edit, :update, :delete, :destroy ]
 
-  # GET /groups
   def index
     @groups = current_user.groups.active.order(created_at: :desc)
   end
 
-  # GET /groups/:id
   def show
     authorize! :read, @group
     @members             = @group.group_members.includes(:user)
@@ -19,14 +17,12 @@ class GroupsController < ApplicationController
                       .limit(20)
     @balances = Groups::BalanceService.new(@group).call
 
-    # My own net balance in this group (positive = others owe me, negative = I owe)
+    # current user net balance in this group
     @my_balance_cents = @balances.find { |b| b[:user] == current_user }&.dig(:balance_cents) || 0
 
-    # Per-member breakdown: what I owe to each person / what each owes me
-    # We compute bilateral net between current_user and every other member
+    # compute net between current_user and every other member
     @my_balance_detail = @balances.reject { |b| b[:user] == current_user }.map do |entry|
       other = entry[:user]
-      # Net = what other paid for me minus what I paid for them
       i_owe_other   = compute_bilateral_cents(@group, payer: other, ower: current_user)
       other_owes_me = compute_bilateral_cents(@group, payer: current_user, ower: other)
       net = other_owes_me - i_owe_other   # positive = they owe me, negative = I owe them
@@ -34,13 +30,11 @@ class GroupsController < ApplicationController
     end.reject { |b| b[:net_cents] == 0 }
   end
 
-  # GET /groups/new
   def new
     authorize! :create, Group
     @group = Group.new
   end
 
-  # POST /groups
   def create
     authorize! :create, Group
     @group = Groups::CreateService.new(current_user, group_params).call
@@ -52,12 +46,10 @@ class GroupsController < ApplicationController
     end
   end
 
-  # GET /groups/:id/edit
   def edit
     authorize! :update, @group
   end
 
-  # PATCH /groups/:id
   def update
     authorize! :update, @group
     if @group.update(group_params)
@@ -67,7 +59,7 @@ class GroupsController < ApplicationController
     end
   end
 
-  # GET /groups/:id/delete
+  # help to check if group can be deleted
   def delete
     authorize! :destroy, @group
     @balances           = Groups::BalanceService.new(@group).call
@@ -75,7 +67,6 @@ class GroupsController < ApplicationController
     @can_delete         = @unsettled_balances.empty?
   end
 
-  # DELETE /groups/:id
   def destroy
     authorize! :destroy, @group
     group_name = Groups::DeleteService.new(group: @group).call

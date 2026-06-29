@@ -20,7 +20,7 @@ module Groups
         end
       end
 
-      group  # Return the group (check group.persisted? in controller)
+      group  # Return
     end
   end
 end

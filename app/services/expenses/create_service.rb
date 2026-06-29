@@ -5,7 +5,7 @@ module Expenses
       @group      = group
       @creator    = creator
       @params     = params
-      @split_data = split_data  # Array of { user_id:, owed_amount_cents: }
+      @split_data = split_data  # { user_id:, owed_amount_cents: }
     end
 
     def call
@@ -14,7 +14,7 @@ module Expenses
       expense = @group.expenses.build(
         @params.merge(created_by: @creator)
       )
-
+      # make complete cycle in one go
       Expense.transaction do
         expense.save!
         create_splits(expense)
@@ -64,7 +64,6 @@ module Expenses
         body:              "#{@creator.username} added \"#{expense.title}\""
       )
 
-      # Recipients: all members of the group except the actor
       recipients = @group.members.where.not(id: @creator.id)
       recipients.each do |recipient|
         notification.notification_recipients.create!(recipient: recipient)

@@ -8,7 +8,7 @@ module Balances
     def call
       you_are_owed_cents = 0
       you_owe_cents      = 0
-
+      # dashboard balance summary
       balances_by_group.each_value do |balance|
         if balance.positive?
           you_are_owed_cents += balance

@@ -39,6 +39,7 @@ module Groups
       "Cannot delete this group until all balances are settled. #{details}"
     end
 
+    # tell what user owes or what user is owed
     def member_balance_line(entry)
       user     = entry[:user]
       cents    = entry[:balance_cents]

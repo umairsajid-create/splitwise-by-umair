@@ -1,21 +1,18 @@
 # frozen_string_literal: true
 
 class ExpensesController < ApplicationController
-  include BlockedUserGuard
+  include BlockedUserGuard # block user from admin side
 
   before_action :authenticate_user!
   before_action :set_group
   before_action :set_expense, only: [ :show, :destroy ]
 
-  # GET /groups/:group_id/expenses/new
   def new
     @expense = Expense.new(expense_date: Date.today)
     @members = @group.members
   end
 
-  # POST /groups/:group_id/expenses
   def create
-    # Convert whole-number amount to cents (e.g. user types 4000 -> 400000 cents)
     raw_params = expense_params
     if raw_params[:total_amount].present?
       raw_params = raw_params.merge(total_amount_cents: (raw_params[:total_amount].to_f * 100).round)
@@ -39,12 +36,11 @@ class ExpensesController < ApplicationController
     end
   end
 
-  # GET /groups/:group_id/expenses/:id
+
   def show
     @splits = @expense.expense_splits.includes(:user)
   end
 
-  # DELETE /groups/:group_id/expenses/:id
   def destroy
     Expenses::DeleteService.new(@expense).call
     redirect_to @group, notice: "Expense deleted."
@@ -77,7 +73,7 @@ class ExpensesController < ApplicationController
 
     # Check if JS provided valid split data
     js_sum = permitted.sum { |s| s[:owed_amount_cents].to_i }
-    
+
     if js_sum > 0
       # JS calculated splits correctly — use them
       permitted
