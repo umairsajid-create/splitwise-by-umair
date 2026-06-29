@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class GroupInvitation < ApplicationRecord
   # Enums
   enum :status, { pending: 0, accepted: 1, declined: 2, expired: 3 }

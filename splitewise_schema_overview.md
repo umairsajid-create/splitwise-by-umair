@@ -26,20 +26,6 @@
 
 ---
 
-## Open Questions
-
-> [!WARNING]
-> **Q1: What is "SHR"?**
-> You mentioned your lead wants "service like SHR." I'm not sure what this abbreviation means. Could it be:
-> - **SRP** (Single Responsibility Principle) — a code design pattern?
-> - **Service Objects** — a Rails pattern for business logic?
-> - **SHR** — a specific internal tool at your company?
-> Please clarify so I can incorporate it correctly.
-
-> [!NOTE]
-> **Q2: Elasticsearch Hosting**
-> For Elasticsearch, will your company provide a managed service (like AWS OpenSearch), or should we plan to self-host it in Docker alongside the app?
-
 ---
 
 ## Premium vs Simple User — Feature Gates
