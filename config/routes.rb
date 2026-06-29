@@ -24,7 +24,11 @@ Rails.application.routes.draw do
     end
     resources :expenses, except: [ :index ]
     resources :settlements, only: [ :new, :create ]
-    resources :invitations, only: [ :new, :create ]
+    resources :invitations, only: [ :new, :create ] do
+      collection do
+        get :created
+      end
+    end
     resources :group_members, only: [ :destroy ]
     resource :membership, only: [ :show, :destroy ], controller: "group_memberships"
   end

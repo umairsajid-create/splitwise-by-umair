@@ -1,12 +1,20 @@
 
 
 class Expense < ApplicationRecord
-  # Enums
-  enum :record_type, { expense: 0, settlement: 1 }, prefix: true
-  enum :category, { general: 0, food: 1, transport: 2, entertainment: 3,
-                     utilities: 4, rent: 5, shopping: 6, healthcare: 7, other_category: 8 }
-  enum :split_type, { equal: 0, exact: 1, percentage: 2, adjustment: 3 }
-  enum :status, { active: 0, deleted: 1, updated: 2 }
+  # Enums — instance_methods: false on record_type avoids predicate conflicts on reload
+  unless defined_enums.key?("record_type")
+    enum :record_type, { expense: 0, settlement: 1 }, instance_methods: false
+  end
+  unless defined_enums.key?("category")
+    enum :category, { general: 0, food: 1, transport: 2, entertainment: 3,
+                       utilities: 4, rent: 5, shopping: 6, healthcare: 7, other_category: 8 }
+  end
+  unless defined_enums.key?("split_type")
+    enum :split_type, { equal: 0, exact: 1, percentage: 2, adjustment: 3 }
+  end
+  unless defined_enums.key?("status")
+    enum :status, { active: 0, deleted: 1, updated: 2 }
+  end
 
   # Active Storage
   has_one_attached :proof
@@ -39,7 +47,7 @@ class Expense < ApplicationRecord
   end
 
   def settlement?
-    record_type_settlement?
+    record_type == "settlement"
   end
 
   searchkick word_start: [ :title, :note, :group_name, :created_by_name ],

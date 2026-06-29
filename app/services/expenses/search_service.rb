@@ -15,7 +15,7 @@ module Expenses
       return sql_search unless @use_elasticsearch
 
       elasticsearch_search
-    rescue Searchkick::Error, Elasticsearch::Transport::Transport::Errors::ServiceUnavailable,
+    rescue Searchkick::Error, OpenSearch::Transport::Transport::Error,
            Faraday::ConnectionFailed, Faraday::TimeoutError => e
       Rails.logger.warn("[Expenses::SearchService] Elasticsearch unavailable: #{e.message}")
       sql_search
@@ -42,7 +42,7 @@ module Expenses
           { created_by_name: :word_start }
         ],
         where: {
-          status: Expense.statuses[:active],
+          status: "active",
           member_ids: @user.id
         },
         order: { created_at: :desc },

@@ -1,0 +1,63 @@
+<div id="activity_results">
+  <% if @query.present? %>
+    <p class="activity-search__meta text-muted text-sm mt-xs">
+      <% if @using_elasticsearch %>
+        Showing Elasticsearch results for “<%= @query %>”
+      <% else %>
+        Showing results for “<%= @query %>”
+        <% unless @can_use_elasticsearch %>
+          · <span class="text-muted">Upgrade to Premium for full-text search</span>
+        <% end %>
+      <% end %>
+    </p>
+  <% elsif @can_use_elasticsearch %>
+    <p class="activity-search__meta text-muted text-sm mt-xs">Premium full-text search is enabled.</p>
+  <% end %>
+
+  <% if @activities.empty? %>
+    <div class="card p-xl text-center mt-md">
+      <div class="avatar avatar--xl avatar--teal mx-auto mb-md" style="background: var(--bg-surface-2); color: var(--text-muted);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+      </div>
+      <% if @query.present? %>
+        <h3 class="fw-bold mb-xs">No results found</h3>
+        <p class="text-muted text-sm">Nothing matched “<%= @query %>”. Try another keyword.</p>
+      <% else %>
+        <h3 class="fw-bold mb-xs">No activity yet!</h3>
+        <p class="text-muted text-sm">Activities from your groups will appear here.</p>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card card--shadow">
+      <% @activities.each do |activity| %>
+        <%= link_to group_expense_path(activity.group, activity), class: "list-item text-decoration-none" do %>
+          <div class="category-icon category-icon--<%= activity.category %>">
+            <%= { general: "🧾", food: "🍕", transport: "🚗", entertainment: "🎮",
+                  utilities: "💡", rent: "🏠", shopping: "🛍️",
+                  healthcare: "💊", other: "📦" }[activity.category.to_sym] || "🧾" %>
+          </div>
+
+          <div class="list-item__body">
+            <div class="list-item__title text-primary"><%= activity.title %></div>
+            <div class="list-item__subtitle">
+              <% if activity.settlement? %>
+                <%= activity.created_by.username %> paid <%= activity.expense_splits.where(owed_amount_cents: 0).first&.user&.username %>
+              <% else %>
+                <%= activity.created_by.username %> added an expense in "<%= activity.group.name %>"
+              <% end %>
+            </div>
+          </div>
+
+          <div class="list-item__meta text-right">
+            <div class="text-sm fw-bold">
+              <%= number_to_currency(activity.total_amount_cents / 100.0, unit: activity.currency + " ") %>
+            </div>
+            <div class="text-xs text-muted mt-xs">
+              <%= time_ago_in_words(activity.created_at) %> ago
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

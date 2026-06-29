@@ -19,9 +19,24 @@ RSpec.describe Expense, type: :model do
   end
 
   describe "enums" do
-    it { should define_enum_for(:record_type).with_values(expense: 0, settlement: 1).with_prefix(true) }
+    it { should define_enum_for(:record_type).with_values(expense: 0, settlement: 1).without_instance_methods }
     it { should define_enum_for(:split_type).with_values(equal: 0, exact: 1, percentage: 2, adjustment: 3) }
     it { should define_enum_for(:status).with_values(active: 0, deleted: 1, updated: 2) }
+
+    it "does not define record_type predicate methods (avoids conflicts on reload)" do
+      expect(Expense.instance_methods).not_to include(:expense?)
+      expect(Expense.instance_methods).not_to include(:record_type_expense?)
+    end
+  end
+
+  describe "#settlement?" do
+    it "returns true for settlement record type" do
+      expect(build(:expense, :settlement).settlement?).to be true
+    end
+
+    it "returns false for expense record type" do
+      expect(build(:expense).settlement?).to be false
+    end
   end
 
   describe "scopes" do

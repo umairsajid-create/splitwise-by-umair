@@ -42,12 +42,32 @@
 <script>
   function copyInviteLink() {
     const input = document.getElementById("invite-link");
+    if (!input || !input.value) return;
+
     input.select();
     input.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(input.value).then(function() {
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(input.value).then(showCopyFeedback).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+
+    function fallbackCopy() {
+      try {
+        document.execCommand("copy");
+        showCopyFeedback();
+      } catch (e) {
+        console.error("Copy failed", e);
+      }
+    }
+
+    function showCopyFeedback() {
       const feedback = document.getElementById("copy-feedback");
-      feedback.style.display = "block";
-      setTimeout(function() { feedback.style.display = "none"; }, 2000);
-    });
+      if (feedback) {
+        feedback.style.display = "block";
+        setTimeout(function() { feedback.style.display = "none"; }, 2000);
+      }
+    }
   }
 </script>

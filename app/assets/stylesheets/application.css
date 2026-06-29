@@ -1996,6 +1996,12 @@ textarea.form-control {
   margin: 0;
 }
 
+#activity_results[aria-busy="true"] {
+  opacity: 0.65;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
 /* avatar--xs size used in balance rows */
 .avatar--xs {
   width: 24px;

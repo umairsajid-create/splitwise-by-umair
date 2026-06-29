@@ -14,7 +14,10 @@
       <strong style="color: var(--text-primary);"><%= @invitation.group.name %></strong> on Splitwise.
     </p>
 
-    <%= form_with url: confirm_invitation_path(token: @invitation.token), method: :post, local: true do |f| %>
+    <%= form_with url: confirm_invitation_path(token: @invitation.token),
+                  method: :post,
+                  local: true,
+                  data: { turbo: false } do |f| %>
       <%= f.submit "Accept Invitation", class: "btn btn--primary btn--block btn--lg mb-sm" %>
     <% end %>
 

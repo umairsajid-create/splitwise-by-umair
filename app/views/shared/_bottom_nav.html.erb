@@ -40,7 +40,8 @@
   <%# 4. Activity / Notifications %>
   <%= link_to activity_path,
         class: "bottom-nav__item #{controller_name == 'activity' ? 'active' : ''}",
-        "aria-label": "Activity" do %>
+        "aria-label": "Activity",
+        data: { turbo_cache: false } do %>
     <% unread_count = current_user.unread_notification_count %>
     <div style="position:relative; display:inline-flex;">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">

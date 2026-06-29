@@ -2,7 +2,9 @@
 
 require "searchkick"
 
-Searchkick.client = Elasticsearch::Client.new(
+require "opensearch-ruby"
+
+Searchkick.client = OpenSearch::Client.new(
   url: ENV.fetch("ELASTICSEARCH_URL", "http://localhost:9200"),
   transport_options: { request: { timeout: 5 } }
 )
