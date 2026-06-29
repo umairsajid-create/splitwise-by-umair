@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 class Notification < ApplicationRecord
-  # ============================================
   # Enums
-  # ============================================
   enum :notification_type, {
     expense_added: 0,
     expense_updated: 1,
@@ -15,24 +13,18 @@ class Notification < ApplicationRecord
     payment_reminder: 7
   }
 
-  # ============================================
   # Associations
-  # ============================================
   belongs_to :actor, class_name: "User"
   belongs_to :notifiable, polymorphic: true
 
   has_many :notification_recipients, dependent: :destroy
   has_many :recipients, through: :notification_recipients, source: :recipient
 
-  # ============================================
   # Validations
-  # ============================================
   validates :notification_type, presence: true
   validates :title, presence: true, length: { maximum: 255 }
 
-  # ============================================
   # Scopes
-  # ============================================
   scope :recent, -> { order(created_at: :desc) }
   scope :by_type, ->(type) { where(notification_type: type) }
 end

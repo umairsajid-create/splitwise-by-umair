@@ -1,26 +1,17 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
-  # ============================================
   # Devise modules
-  # ============================================
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  # ============================================
   # Enums
-  # ============================================
   enum :role, { simple: 0, premium: 1, admin: 2 }
 
-  # ============================================
   # Active Storage
-  # ============================================
   has_one_attached :avatar
 
-  # ============================================
   # Associations
-  # ============================================
-
   # Groups
   has_many :created_groups, class_name: "Group", foreign_key: :creator_id, dependent: :nullify
   has_many :group_memberships, class_name: "GroupMember", dependent: :destroy
@@ -42,28 +33,20 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :default_splits, dependent: :destroy
 
-  # ============================================
   # Validations
-  # ============================================
-  validates :username, presence: true,
-                       uniqueness: { case_sensitive: false },
-                       length: { minimum: 3, maximum: 30 }
+  validates :username, presence: true, uniqueness: { case_sensitive: false }, length: { minimum: 3, maximum: 30 }
   validates :phone_number, length: { maximum: 20 }, allow_blank: true
   validates :role, presence: true
   validates :daily_expense_limit, numericality: { greater_than_or_equal_to: 0 }
   validates :daily_settlement_limit, numericality: { greater_than_or_equal_to: 0 }
   validates :default_currency, presence: true
 
-  # ============================================
   # Scopes
-  # ============================================
   scope :premium_users, -> { where(role: :premium) }
   scope :admins, -> { where(role: :admin) }
   scope :simple_users, -> { where(role: :simple) }
 
-  # ============================================
   # Instance Methods
-  # ============================================
   def premium_or_admin?
     premium? || admin?
   end
