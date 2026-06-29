@@ -76,4 +76,16 @@ class User < ApplicationRecord
   def unread_notification_count
     notification_recipients.unread.count
   end
+
+  def blocked?
+    blocked_at.present?
+  end
+
+  def block!
+    update!(blocked_at: Time.current)
+  end
+
+  def unblock!
+    update!(blocked_at: nil)
+  end
 end

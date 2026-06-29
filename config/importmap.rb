@@ -2,6 +2,7 @@
 
 pin "application"
 pin "activity_search"
+pin "admin_charts"
 pin "@hotwired/turbo-rails", to: "turbo.min.js"
 pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"

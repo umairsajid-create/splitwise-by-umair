@@ -12,6 +12,8 @@ module Settlements
     end
 
     def call
+      raise StandardError, "Your account has been blocked." if @payer.blocked?
+
       settlement = nil
 
       Expense.transaction do

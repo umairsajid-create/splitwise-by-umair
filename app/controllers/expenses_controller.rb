@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ExpensesController < ApplicationController
+  include BlockedUserGuard
+
   before_action :authenticate_user!
   before_action :set_group
   before_action :set_expense, only: [ :show, :destroy ]

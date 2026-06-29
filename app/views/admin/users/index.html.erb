@@ -1,0 +1,55 @@
+<% content_for :title, "Admin Users — Splitwise" %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "User security", back_path: admin_root_path %>
+<% end %>
+
+<div class="animate-fade-in admin-page">
+  <div class="admin-page__header mb-md">
+    <h1 class="page-heading mb-xs">User security</h1>
+    <p class="text-muted text-sm">Block users to prevent them from adding expenses or recording settlements.</p>
+  </div>
+
+  <div class="card card--shadow">
+    <% @users.each do |user| %>
+      <div class="list-item admin-user-row">
+        <div class="avatar avatar--sm avatar--teal"><%= user.username.first.upcase %></div>
+
+        <div class="list-item__body">
+          <div class="list-item__title">
+            <%= user.username %>
+            <span class="badge badge--<%= user.role %>"><%= user.role %></span>
+            <% if user.blocked? %>
+              <span class="badge badge--blocked">Blocked</span>
+            <% end %>
+          </div>
+          <div class="list-item__subtitle text-muted"><%= user.email %></div>
+        </div>
+
+        <div class="admin-user-row__actions">
+          <% if user == current_user %>
+            <span class="text-muted text-sm">You</span>
+          <% elsif user.admin? %>
+            <span class="text-muted text-sm">Protected</span>
+          <% elsif user.blocked? %>
+            <%= button_to "Unblock",
+                  unblock_admin_user_path(user),
+                  method: :patch,
+                  class: "btn btn--outline btn--sm",
+                  data: { turbo: false } %>
+          <% else %>
+            <%= button_to "Block",
+                  block_admin_user_path(user),
+                  method: :patch,
+                  class: "btn btn--danger btn--sm",
+                  data: { turbo: false, turbo_confirm: "Block #{user.username}? They cannot add expenses or settlements." } %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-md">
+    <%= link_to "← Analytics", admin_root_path, class: "btn btn--ghost btn--sm" %>
+  </div>
+</div>

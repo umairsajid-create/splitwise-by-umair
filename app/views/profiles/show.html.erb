@@ -28,10 +28,15 @@
           <div class="text-secondary text-sm"><%= @user.phone_number %></div>
         <% end %>
         <div class="mt-xs">
-          <span class="badge badge--<%= @user.role == 'admin' ? 'negative' : (@user.role == 'premium' ? 'primary' : 'neutral') %>">
+          <span class="badge badge--<%= @user.role %>">
             <%= @user.role.capitalize %>
           </span>
         </div>
+        <% if @user.blocked? %>
+          <div class="mt-xs">
+            <span class="badge badge--blocked">Account blocked</span>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
@@ -78,6 +83,20 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     <% end %>
   </div>
+
+  <% if @user.admin? %>
+    <div class="card card--shadow mb-md">
+      <div class="card__header"><span class="section-title">Admin</span></div>
+      <%= link_to admin_root_path, class: "list-item" do %>
+        <div class="list-item__icon">📊</div>
+        <div class="list-item__body">
+          <div class="list-item__title">Analytics & security</div>
+          <div class="list-item__subtitle">Platform stats and user blocking</div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      <% end %>
+    </div>
+  <% end %>
 
   <%# Sign out %>
   <div class="card card--shadow">

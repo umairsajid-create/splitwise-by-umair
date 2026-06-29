@@ -2289,6 +2289,101 @@ textarea.form-control {
 .badge--couple { background: #F6F8FA; color: #24292E; border: 1px solid #E1E4E8; }
 .badge--other  { background: #F6F8FA; color: #24292E; border: 1px solid #E1E4E8; }
 
+/* ── ADMIN ─────────────────────────────────────────────────── */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+}
+
+.admin-stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+}
+
+.admin-stat-card__label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.admin-stat-card__value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.admin-stat-card__hint {
+  margin-top: var(--space-xs);
+}
+
+.admin-chart__title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  margin: 0 0 var(--space-md);
+}
+
+.admin-chart__canvas-wrap {
+  position: relative;
+  height: 260px;
+}
+
+.admin-chart-card {
+  overflow: hidden;
+}
+
+.admin-chart__total {
+  margin: var(--space-sm) 0 0;
+}
+
+.admin-period-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.admin-period-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-period-tabs__btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.admin-period-tabs__btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.admin-user-row {
+  align-items: center;
+}
+
+.admin-user-row__actions {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.badge--simple  { background: #F3F4F6; color: #374151; }
+.badge--premium { background: #FEF3C7; color: #92400E; }
+.badge--admin   { background: #E8F0FE; color: #1967D2; }
+.badge--blocked { background: #FEE2E2; color: #B91C1C; }
+
 /* ============================================================
    24. DESKTOP ADJUSTMENTS
    ============================================================ */

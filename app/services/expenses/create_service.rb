@@ -9,6 +9,8 @@ module Expenses
     end
 
     def call
+      raise StandardError, "Your account has been blocked." if @creator.blocked?
+
       expense = @group.expenses.build(
         @params.merge(created_by: @creator)
       )

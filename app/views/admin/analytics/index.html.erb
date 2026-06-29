@@ -1,0 +1,82 @@
+<% content_for :title, "Admin Analytics — Splitwise" %>
+
+<% content_for :head do %>
+  <%= javascript_import_module_tag "admin_charts" %>
+<% end %>
+
+<% content_for :top_bar do %>
+  <%= render "shared/top_bar", title: "Admin Analytics", back_path: root_path %>
+<% end %>
+
+<div class="animate-fade-in admin-page">
+  <div class="admin-page__header">
+    <h1 class="page-heading mb-xs">Analytics</h1>
+    <p class="text-muted text-sm">Platform overview for administrators.</p>
+  </div>
+
+  <div class="admin-stats mb-lg">
+    <div class="admin-stat-card">
+      <div class="admin-stat-card__label">Total users</div>
+      <div class="admin-stat-card__value"><%= @analytics[:totals][:users] %></div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-card__label">Groups created</div>
+      <div class="admin-stat-card__value"><%= @analytics[:totals][:groups] %></div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-card__label">Activity records</div>
+      <div class="admin-stat-card__value"><%= @analytics[:totals][:activities] %></div>
+      <div class="admin-stat-card__hint text-muted text-sm">Expenses & settlements</div>
+    </div>
+  </div>
+
+  <div class="admin-period-tabs mb-md">
+    <% [["day", "Daily"], ["week", "Weekly"], ["month", "Monthly"]].each do |key, label| %>
+      <%= link_to label,
+            admin_root_path(period: key),
+            class: "admin-period-tabs__btn #{@period == key ? 'admin-period-tabs__btn--active' : ''}" %>
+    <% end %>
+  </div>
+  <p class="text-muted text-sm mb-md"><%= @analytics[:period_label] %></p>
+
+  <div class="admin-charts"
+       data-labels="<%= @analytics[:labels].to_json %>"
+       data-users="<%= @analytics[:users_series].to_json %>"
+       data-groups="<%= @analytics[:groups_series].to_json %>"
+       data-activities="<%= @analytics[:activity_series].to_json %>">
+
+    <div class="card card--shadow p-md mb-md admin-chart-card">
+      <h2 class="admin-chart__title">New users</h2>
+      <div class="admin-chart__canvas-wrap">
+        <canvas id="admin-users-chart"></canvas>
+      </div>
+      <p class="admin-chart__total text-muted text-sm">
+        Total in range: <strong><%= @analytics[:users_series].sum %></strong>
+      </p>
+    </div>
+
+    <div class="card card--shadow p-md mb-md admin-chart-card">
+      <h2 class="admin-chart__title">Groups created</h2>
+      <div class="admin-chart__canvas-wrap">
+        <canvas id="admin-groups-chart"></canvas>
+      </div>
+      <p class="admin-chart__total text-muted text-sm">
+        Total in range: <strong><%= @analytics[:groups_series].sum %></strong>
+      </p>
+    </div>
+
+    <div class="card card--shadow p-md mb-md admin-chart-card">
+      <h2 class="admin-chart__title">Activity</h2>
+      <div class="admin-chart__canvas-wrap">
+        <canvas id="admin-activity-chart"></canvas>
+      </div>
+      <p class="admin-chart__total text-muted text-sm">
+        Total in range: <strong><%= @analytics[:activity_series].sum %></strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-md">
+    <%= link_to "User security →", admin_users_path, class: "btn btn--outline" %>
+  </div>
+</div>
