@@ -5,13 +5,11 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  # Enums
   enum :role, { simple: 0, premium: 1, admin: 2 }
 
-  # Active Storage
+  # profile pic
   has_one_attached :avatar
 
-  # Associations
   # Groups
   has_many :created_groups, class_name: "Group", foreign_key: :creator_id, dependent: :nullify
   has_many :group_memberships, class_name: "GroupMember", dependent: :destroy
@@ -41,7 +39,7 @@ class User < ApplicationRecord
   validates :daily_settlement_limit, numericality: { greater_than_or_equal_to: 0 }
   validates :default_currency, presence: true
 
-  # Scopes
+
   scope :premium_users, -> { where(role: :premium) }
   scope :admins, -> { where(role: :admin) }
   scope :simple_users, -> { where(role: :simple) }

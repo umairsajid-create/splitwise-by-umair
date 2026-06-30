@@ -4,17 +4,16 @@ class Ability
   include CanCan::Ability
 
   def initialize(user)
-    # Guest users (not logged in) can't do anything
+    # Guest users can't do anything
     return unless user.present?
 
-    # ALL USERS — own groups they are members of
-
+    # simple user
     can :read,    Group, group_members: { user_id: user.id }
     can :update,  Group, group_members: { user_id: user.id, role: :admin }
     can :destroy, Group, group_members: { user_id: user.id, role: :admin }
     can :create,  Group
 
-    # PREMIUM + ADMIN users only
+    # for premium and admin users
     if user.premium_or_admin?
       can :view_charts,   Group
       can :export,        Group
@@ -24,7 +23,7 @@ class Ability
     end
 
 
-    # ADMIN only
+    # admin only
     if user.admin?
       can :manage, :all
     end

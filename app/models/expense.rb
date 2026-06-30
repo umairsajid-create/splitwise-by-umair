@@ -1,7 +1,7 @@
 
 
 class Expense < ApplicationRecord
-  # Enums — instance_methods: false on record_type avoids predicate conflicts on reload
+  # use defined_enums.key? to check either enum is already defined
   unless defined_enums.key?("record_type")
     enum :record_type, { expense: 0, settlement: 1 }, instance_methods: false
   end
@@ -16,16 +16,14 @@ class Expense < ApplicationRecord
     enum :status, { active: 0, deleted: 1, updated: 2 }
   end
 
-  # Active Storage
+  # upload img as proof
   has_one_attached :proof
 
-  # Associations
+
   belongs_to :group
   belongs_to :created_by, class_name: "User"
   belongs_to :paid_by, class_name: "User"
   has_many :expense_splits, dependent: :destroy
-
-  # Validations
   validates :title, presence: true, length: { maximum: 255 }
   validates :total_amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :currency, presence: true, length: { is: 3 }
@@ -34,7 +32,6 @@ class Expense < ApplicationRecord
   validates :category, presence: true
   validates :split_type, presence: true
 
-  # Scopes
   scope :active_records, -> { where(status: :active) }
   scope :expenses_only, -> { where(record_type: :expense) }
   scope :settlements_only, -> { where(record_type: :settlement) }

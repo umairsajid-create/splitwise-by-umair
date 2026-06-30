@@ -1,15 +1,9 @@
 
 class GroupMember < ApplicationRecord
-  # Enums
   enum :role, { member: 0, admin: 1 }
-
-
-  # Associations
-
   belongs_to :group
   belongs_to :user
   belongs_to :invited_by, class_name: "User", optional: true
-  # Validations
   validates :joined_at, presence: true
   validates :user_id, uniqueness: { scope: :group_id, message: "is already a member of this group" }
 
