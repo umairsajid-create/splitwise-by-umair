@@ -17,17 +17,40 @@ class GroupsController < ApplicationController
                       .limit(20)
     @balances = Groups::BalanceService.new(@group).call
 
-    # current user net balance in this group
     @my_balance_cents = @balances.find { |b| b[:user] == current_user }&.dig(:balance_cents) || 0
 
-    # compute net between current_user and every other member
-    @my_balance_detail = @balances.reject { |b| b[:user] == current_user }.map do |entry|
-      other = entry[:user]
-      i_owe_other   = compute_bilateral_cents(@group, payer: other, ower: current_user)
-      other_owes_me = compute_bilateral_cents(@group, payer: current_user, ower: other)
-      net = other_owes_me - i_owe_other   # positive = they owe me, negative = I owe them
-      { user: other, net_cents: net }
-    end.reject { |b| b[:net_cents] == 0 }
+    # this handles multi-payer expenses natively since it just relies on net balances
+    creditors = @balances.select { |b| b[:balance_cents] > 0 }.map(&:dup)
+    debtors   = @balances.select { |b| b[:balance_cents] < 0 }.map(&:dup)
+
+    transactions = []
+
+    while creditors.any? && debtors.any?
+      creditor = creditors.first
+      debtor   = debtors.last # debtors are sorted desc, so last is most negative
+      # .min bcz debtors never pay more then creditor owe him
+      amount = [ creditor[:balance_cents], debtor[:balance_cents].abs ].min
+
+      transactions << { from: debtor[:user], to: creditor[:user], amount: amount }
+
+      creditor[:balance_cents] -= amount
+      debtor[:balance_cents]   += amount
+
+      creditors.shift if creditor[:balance_cents] == 0
+      debtors.pop     if debtor[:balance_cents]   == 0
+    end
+
+    # extract only transactions involving the current_user
+    @my_balance_detail = []
+    transactions.each do |t|
+      if t[:from] == current_user
+        # I owe them
+        @my_balance_detail << { user: t[:to], net_cents: -t[:amount] }
+      elsif t[:to] == current_user
+        # They owe me
+        @my_balance_detail << { user: t[:from], net_cents: t[:amount] }
+      end
+    end
   end
 
   def new
@@ -85,14 +108,5 @@ class GroupsController < ApplicationController
 
   def group_params
     params.require(:group).permit(:name, :group_type, :avatar)
-  end
-
-  def compute_bilateral_cents(group, payer:, ower:)
-    group.expenses
-         .where(status: 0)
-         .where("paid_by_id = ? OR (paid_by_id IS NULL AND created_by_id = ?)", payer.id, payer.id)
-         .joins(:expense_splits)
-         .where(expense_splits: { user_id: ower.id })
-         .sum("expense_splits.owed_amount_cents")
   end
 end

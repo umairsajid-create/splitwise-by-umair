@@ -1,19 +1,25 @@
 
 module Expenses
   class CreateService
-    def initialize(group:, creator:, params:, split_data:)
+    def initialize(group:, creator:, params:, split_data:, payer_data: {})
       @group      = group
       @creator    = creator
       @params     = params
       @split_data = split_data  # { user_id:, owed_amount_cents: }
+      @payer_data = payer_data  # { user_id => paid_amount_cents }
     end
 
     def call
       raise StandardError, "Your account has been blocked." if @creator.blocked?
 
-      expense = @group.expenses.build(
+        expense = @group.expenses.build(
         @params.merge(created_by: @creator)
       )
+
+      if expense.is_multi_payer?
+        expense.payer_ids  = @payer_data.keys
+        expense.paid_by_id = nil
+      end
       # make complete cycle in one go
       Expense.transaction do
         expense.save!
@@ -38,12 +44,17 @@ module Expenses
       @split_data.each do |split|
         user_id = split[:user_id].to_i
         owed    = split[:owed_amount_cents].to_i
-        paid    = user_id == payer_id ? expense.total_amount_cents : 0
 
-        expense.expense_splits.create!(
-          user_id:            user_id,
-          paid_amount_cents:  paid,
-          owed_amount_cents:  owed
+          paid = if expense.is_multi_payer?
+            @payer_data[user_id] || 0
+          else
+            user_id == payer_id ? expense.total_amount_cents : 0
+          end
+
+           expense.expense_splits.create!(
+            user_id:            user_id,
+            paid_amount_cents:  paid,
+            owed_amount_cents:  owed
         )
       end
     end

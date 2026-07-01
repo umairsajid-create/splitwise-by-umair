@@ -57,7 +57,7 @@
         <% if @my_balance_cents == 0 %>
           <span>🎉 &nbsp;PKR 0</span>
         <% else %>
-          <%= number_to_currency(@my_balance_cents.abs / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+          <%= number_to_currency(@my_balance_cents.abs / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 2) %>
         <% end %>
       </div>
     </div>
@@ -71,11 +71,11 @@
           <div class="grp-balance-card__row-name"><%= entry[:user].username %></div>
           <% if entry[:net_cents] > 0 %>
             <div class="grp-balance-card__row-amount grp-balance-card__row-amount--owes-you">
-              owes you <%= number_to_currency(entry[:net_cents] / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+              owes you <%= number_to_currency(entry[:net_cents] / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 2) %>
             </div>
           <% else %>
             <div class="grp-balance-card__row-amount grp-balance-card__row-amount--you-owe">
-              you owe <%= number_to_currency(entry[:net_cents].abs / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+              you owe <%= number_to_currency(entry[:net_cents].abs / 100.0, unit: (current_user.default_currency.presence || "PKR") + " ", precision: 2) %>
             </div>
           <% end %>
         </div>
@@ -146,14 +146,14 @@
               <% my_split = expense.expense_splits.find { |s| s.user_id == current_user.id } %>
               <div class="list-item__amount amount--neutral">
                 <%= number_to_currency(expense.total_amount_cents / 100.0,
-                      unit: expense.currency + " ", precision: 0) %>
+                      unit: expense.currency + " ", precision: 2) %>
               </div>
               <% if my_split %>
                 <% if expense.paid_by_id == current_user.id %>
                   <div class="text-xs" style="color: var(--color-positive);">you paid</div>
                 <% elsif my_split.owed_amount_cents > 0 %>
                   <div class="text-xs" style="color: var(--color-negative);">
-                    you owe <%= number_to_currency(my_split.owed_amount_cents / 100.0, unit: expense.currency + " ", precision: 0) %>
+                    you owe <%= number_to_currency(my_split.owed_amount_cents / 100.0, unit: expense.currency + " ", precision: 2) %>
                   </div>
                 <% end %>
               <% end %>
@@ -193,12 +193,12 @@
               <% if balance > 0 %>
                 <div class="list-item__amount amount--positive">
                   <%= is_me ? "get back" : "gets back" %> <%= number_to_currency(balance / 100.0,
-                        unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+                        unit: (current_user.default_currency.presence || "PKR") + " ", precision: 2) %>
                 </div>
               <% elsif balance < 0 %>
                 <div class="list-item__amount amount--negative">
                   <%= is_me ? "owe" : "owes" %> <%= number_to_currency(balance.abs / 100.0,
-                        unit: (current_user.default_currency.presence || "PKR") + " ", precision: 0) %>
+                        unit: (current_user.default_currency.presence || "PKR") + " ", precision: 2) %>
                 </div>
               <% else %>
                 <div class="list-item__amount amount--neutral">settled up</div>

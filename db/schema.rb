@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_115952) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_01_085707) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,8 +74,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_115952) do
     t.string "currency", default: "PKR", null: false
     t.date "expense_date", null: false
     t.bigint "group_id", null: false
+    t.boolean "is_multi_payer", default: false, null: false
     t.text "note"
     t.bigint "paid_by_id"
+    t.integer "payer_ids", default: [], array: true
     t.integer "record_type", default: 0, null: false, comment: "0:expense, 1:settlement"
     t.integer "split_type", default: 0, null: false, comment: "0:equal, 1:exact, 2:percentage, 3:adjustment"
     t.integer "status", default: 0, null: false, comment: "0:active, 1:deleted, 2:updated"
@@ -87,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_115952) do
     t.index ["expense_date"], name: "index_expenses_on_expense_date"
     t.index ["group_id"], name: "index_expenses_on_group_id"
     t.index ["paid_by_id"], name: "index_expenses_on_paid_by_id"
+    t.index ["payer_ids"], name: "index_expenses_on_payer_ids", using: :gin
     t.index ["record_type"], name: "index_expenses_on_record_type"
     t.index ["status"], name: "index_expenses_on_status"
   end

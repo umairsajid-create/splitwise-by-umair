@@ -22,7 +22,7 @@ class Expense < ApplicationRecord
 
   belongs_to :group
   belongs_to :created_by, class_name: "User"
-  belongs_to :paid_by, class_name: "User"
+  belongs_to :paid_by, class_name: "User", optional: true
   has_many :expense_splits, dependent: :destroy
   validates :title, presence: true, length: { maximum: 255 }
   validates :total_amount_cents, presence: true, numericality: { greater_than: 0 }
@@ -39,6 +39,10 @@ class Expense < ApplicationRecord
   scope :for_date_range, ->(start_date, end_date) { where(expense_date: start_date..end_date) }
 
   # Instance Methods
+  def payers
+    User.where(id: payer_ids)
+  end
+
   def total_amount
     total_amount_cents / 100.0
   end

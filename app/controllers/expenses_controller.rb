@@ -23,13 +23,14 @@ class ExpensesController < ApplicationController
       group:      @group,
       creator:    current_user,
       params:     raw_params,
-      split_data: build_split_data(raw_params[:total_amount_cents])
+      split_data: build_split_data(raw_params[:total_amount_cents]),
+      payer_data: build_payer_data
     )
 
     @expense = service.call
 
     if @expense.persisted?
-      redirect_to @group, notice: "Expense \"#{@expense.title}\" added!"
+      redirect_to @group, notice: "Exp  ense \"#{@expense.title}\" added!"
     else
       @members = @group.members
       render :new, status: :unprocessable_entity
@@ -61,7 +62,7 @@ class ExpensesController < ApplicationController
   def expense_params
     params.require(:expense).permit(
       :title, :category, :total_amount, :total_amount_cents, :currency,
-      :split_type, :expense_date, :note, :paid_by_id, :proof
+      :split_type, :expense_date, :note, :paid_by_id, :proof, :is_multi_payer
     )
   end
 
@@ -87,6 +88,16 @@ class ExpensesController < ApplicationController
         amt = share + (i == 0 ? remainder : 0)
         ActionController::Parameters.new(user_id: uid.to_s, owed_amount_cents: amt.to_s).permit(:user_id, :owed_amount_cents)
       end
+    end
+  end
+
+  def build_payer_data
+    payers_hash  = params.fetch(:payers, {})
+    payers_array = payers_hash.respond_to?(:values) ? payers_hash.values : payers_hash
+    permitted    = payers_array.map { |p| p.permit(:user_id, :paid_amount_cents) }
+
+    permitted.each_with_object({}) do |p, h|
+      h[p[:user_id].to_i] = p[:paid_amount_cents].to_i
     end
   end
 end

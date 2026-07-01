@@ -68,21 +68,42 @@
     <h3 class="section-title">Who Paid</h3>
   </div>
   <div class="card card--shadow mb-lg">
-    <% payer = @expense.paid_by || @expense.created_by %>
-    <div class="list-item">
-      <div class="avatar avatar--sm avatar--teal">
-        <%= payer.username.first.upcase %>
-      </div>
-      <div class="list-item__body">
-        <div class="list-item__title"><%= payer.username %></div>
-        <div class="list-item__subtitle">Paid the full amount</div>
-      </div>
-      <div class="list-item__meta">
-        <div class="list-item__amount amount--positive">
-          <%= number_to_currency(@expense.total_amount_cents / 100.0, unit: @expense.currency + " ") %>
+    <% if @expense.is_multi_payer? %>
+      <%# Multi-payer: show each person who paid with their amount %>
+      <% @splits.select { |s| s.paid_amount_cents > 0 }.each do |split| %>
+        <div class="list-item">
+          <div class="avatar avatar--sm avatar--teal">
+            <%= split.user.username.first.upcase %>
+          </div>
+          <div class="list-item__body">
+            <div class="list-item__title"><%= split.user.username %></div>
+            <div class="list-item__subtitle">Paid partially</div>
+          </div>
+          <div class="list-item__meta">
+            <div class="list-item__amount amount--positive">
+              <%= number_to_currency(split.paid_amount_cents / 100.0, unit: @expense.currency + " ") %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <%# Single payer %>
+      <% payer = @expense.paid_by || @expense.created_by %>
+      <div class="list-item">
+        <div class="avatar avatar--sm avatar--teal">
+          <%= payer.username.first.upcase %>
+        </div>
+        <div class="list-item__body">
+          <div class="list-item__title"><%= payer.username %></div>
+          <div class="list-item__subtitle">Paid the full amount</div>
+        </div>
+        <div class="list-item__meta">
+          <div class="list-item__amount amount--positive">
+            <%= number_to_currency(@expense.total_amount_cents / 100.0, unit: @expense.currency + " ") %>
+          </div>
         </div>
       </div>
-    </div>
+    <% end %>
   </div>
 
   <div class="section-header">
@@ -97,16 +118,19 @@
         <div class="list-item__body">
           <div class="list-item__title"><%= split.user.username %></div>
           <div class="list-item__subtitle">
-            <% if split.user == payer %>
-              Owes <%= number_to_currency(split.owed_amount_cents / 100.0, unit: @expense.currency + " ") %> 
-              (Paid <%= number_to_currency(split.paid_amount_cents / 100.0, unit: @expense.currency + " ") %>)
+            <% net = split.net_balance_cents %>
+            <% if net > 0 %>
+              Gets back <%= number_to_currency(net / 100.0, unit: @expense.currency + " ") %>
+            <% elsif net < 0 %>
+              Owes <%= number_to_currency(net.abs / 100.0, unit: @expense.currency + " ") %>
             <% else %>
-              Owes their share
+              Settled (paid their share)
             <% end %>
           </div>
         </div>
         <div class="list-item__meta">
-          <div class="list-item__amount <%= split.owed_amount_cents > 0 ? 'amount--negative' : 'amount--neutral' %>">
+          <div class="list-item__amount <%= net > 0 ? 'amount--positive' : (net < 0 ? 'amount--negative' : 'amount--neutral') %>">
+            <% net = split.net_balance_cents %>
             <%= number_to_currency(split.owed_amount_cents / 100.0, unit: @expense.currency + " ") %>
           </div>
         </div>
