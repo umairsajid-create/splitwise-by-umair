@@ -26,10 +26,17 @@
 
     <%# Description %>
     <div class="ef-field-row">
-      <button type="button" class="ef-field-icon ef-field-icon--desc" id="ef-category-trigger"
-              style="border:none; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; background:none;">
-        <span id="ef-category-icon-display">🧾</span>
-      </button>
+      <div style="flex-shrink: 0; margin-right: 8px;">
+        <select name="expense[category_id]" id="expense_category_id" class="ef-input" style="padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-surface); cursor: pointer;">
+          <% @categories_by_section.each do |section, categories| %>
+            <optgroup label="<%= section %>">
+              <% categories.each do |cat| %>
+                <option value="<%= cat.id %>" <%= 'selected' if @expense.category_id == cat.id %>><%= cat.icon %> <%= cat.name %></option>
+              <% end %>
+            </optgroup>
+          <% end %>
+        </select>
+      </div>
       <%= f.text_field :title, class: "ef-input", placeholder: "Enter a description", required: true %>
     </div>
 
@@ -122,7 +129,6 @@
   </div>
 
   <%# Hidden fields %>
-  <%= f.hidden_field :category,      value: "general", id: "expense_category" %>
   <%= f.hidden_field :split_type,    value: "equal",   id: "expense_split_type_field" %>
   <%= f.hidden_field :is_multi_payer, value: "false",  id: "expense_is_multi_payer" %>
 

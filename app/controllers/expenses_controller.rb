@@ -10,6 +10,7 @@ class ExpensesController < ApplicationController
   def new
     @expense = Expense.new(expense_date: Date.today)
     @members = @group.members
+    @categories_by_section = Category.all.group_by(&:section)
   end
 
   def create
@@ -30,9 +31,10 @@ class ExpensesController < ApplicationController
     @expense = service.call
 
     if @expense.persisted?
-      redirect_to @group, notice: "Exp  ense \"#{@expense.title}\" added!"
+      redirect_to @group, notice: "Expense \"#{@expense.title}\" added!"
     else
       @members = @group.members
+      @categories_by_section = Category.all.group_by(&:section)
       render :new, status: :unprocessable_entity
     end
   end
@@ -61,7 +63,7 @@ class ExpensesController < ApplicationController
 
   def expense_params
     params.require(:expense).permit(
-      :title, :category, :total_amount, :total_amount_cents, :currency,
+      :title, :category_id, :total_amount, :total_amount_cents, :currency,
       :split_type, :expense_date, :note, :paid_by_id, :proof, :is_multi_payer
     )
   end

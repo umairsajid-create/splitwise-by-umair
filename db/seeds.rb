@@ -3,7 +3,32 @@
 puts "🌱 Seeding database..."
 
 # ============================================
-# 1. Create Users
+# 1. Create Categories
+# ============================================
+puts "  Creating categories..."
+
+category_data = [
+  { section: "Entertainment", categories: { "Games" => "🎮", "Movies" => "🍿", "Music" => "🎵", "Sports" => "🏀", "Entertainment" => "🎭" } },
+  { section: "Food and Drink", categories: { "Dining out" => "🍽️", "Groceries" => "🛒", "Liquor" => "🍷", "Food" => "🍕" } },
+  { section: "Home", categories: { "Rent" => "🏠", "Mortgage" => "🏡", "Household supplies" => "🧻", "Maintenance" => "🔧", "Pets" => "🐶" } },
+  { section: "Life", categories: { "Childcare" => "👶", "Clothing" => "👕", "Education" => "📚", "Gifts" => "🎁", "Insurance" => "🛡️", "Medical expenses" => "💊", "Taxes" => "🧾" } },
+  { section: "Transportation", categories: { "Bicycle" => "🚲", "Bus/train" => "🚌", "Car" => "🚗", "Gas/fuel" => "⛽", "Hotel" => "🏨", "Parking" => "🅿️", "Plane" => "✈️", "Taxi" => "🚕", "Transport" => "🚙" } },
+  { section: "Utilities", categories: { "Cleaning" => "🧹", "Electricity" => "⚡", "Heat/gas" => "🔥", "Trash" => "🗑️", "TV/Phone/Internet" => "📱", "Water" => "💧", "Utilities" => "💡" } },
+  { section: "Uncategorized", categories: { "General" => "🧾", "Shopping" => "🛍️", "Healthcare" => "⚕️", "Other" => "📦" } }
+]
+
+category_data.each do |group|
+  group[:categories].each do |name, icon|
+    Category.find_or_create_by!(name: name, section: group[:section]) do |c|
+      c.icon = icon
+    end
+  end
+end
+
+puts "  ✅ Created #{Category.count} categories"
+
+# ============================================
+# 2. Create Users
 # ============================================
 puts "  Creating users..."
 
@@ -59,7 +84,7 @@ simple3 = User.create!(
 puts "  ✅ Created #{User.count} users"
 
 # ============================================
-# 2. Create Groups
+# 3. Create Groups
 # ============================================
 puts "  Creating groups..."
 
@@ -84,7 +109,7 @@ couple_group = Group.create!(
 puts "  ✅ Created #{Group.count} groups"
 
 # ============================================
-# 3. Add Group Members
+# 4. Add Group Members
 # ============================================
 puts "  Adding group members..."
 
@@ -124,11 +149,11 @@ end
 puts "  ✅ Created #{GroupMember.count} group memberships"
 
 # ============================================
-# 4. Create Expenses
+# 5. Create Expenses
 # ============================================
 puts "  Creating expenses..."
 
-categories = %i[food transport entertainment utilities rent shopping]
+categories_list = Category.all.to_a
 
 # Home group expenses
 8.times do |i|
@@ -136,7 +161,7 @@ categories = %i[food transport entertainment utilities rent shopping]
     group: home_group,
     created_by: [ premium, simple1, simple2 ].sample,
     record_type: :expense,
-    category: categories.sample,
+    category_id: categories_list.sample.id,
     title: [ "Groceries", "Electricity Bill", "Internet", "Dinner Out", "Gas Bill",
             "House Cleaning", "Netflix Subscription", "Water Bill" ][i],
     total_amount_cents: rand(500..50000),
@@ -167,7 +192,7 @@ end
     group: trip_group,
     created_by: [ premium, simple1, admin ].sample,
     record_type: :expense,
-    category: [ :food, :transport, :entertainment ].sample,
+    category_id: categories_list.sample.id,
     title: [ "Hotel Room", "Bus Tickets", "Lunch at Monal", "Faisal Mosque Taxi", "Souvenirs" ][i],
     total_amount_cents: rand(1000..100000),
     currency: "PKR",
@@ -193,7 +218,7 @@ end
 puts "  ✅ Created #{Expense.count} expenses with #{ExpenseSplit.count} splits"
 
 # ============================================
-# 5. Create a Settlement
+# 6. Create a Settlement
 # ============================================
 puts "  Creating settlement..."
 
@@ -201,7 +226,7 @@ settlement = Expense.create!(
   group: home_group,
   created_by: simple1,
   record_type: :settlement,
-  category: :general,
+  category_id: Category.find_by(name: "General")&.id,
   title: "Settlement: #{simple1.username} → #{premium.username}",
   total_amount_cents: 5000,
   currency: "PKR",

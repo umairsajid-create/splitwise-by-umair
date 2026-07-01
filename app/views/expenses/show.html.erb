@@ -17,11 +17,10 @@
 
   <%# Expense Hero %>
   <div class="card card--shadow p-lg mb-lg text-center">
-    <div class="category-icon category-icon--<%= @expense.category %> mx-auto mb-sm" style="width: 64px; height: 64px; font-size: 32px;">
-      <%= { general: "🧾", food: "🍕", transport: "🚗", entertainment: "🎮",
-            utilities: "💡", rent: "🏠", shopping: "🛍️",
-            healthcare: "💊", other: "📦" }[@expense.category.to_sym] %>
+    <div class="category-icon mx-auto mb-sm" style="width: 64px; height: 64px; font-size: 32px; display: flex; align-items: center; justify-content: center; background: var(--bg-surface-2); border-radius: 50%;">
+      <%= @expense.category.icon %>
     </div>
+    <div class="text-sm text-muted mb-xs"><%= @expense.category.name %></div>
     
     <h1 class="page-heading mb-xs"><%= @expense.title %></h1>
     <div class="text-xl fw-bold mb-xs" style="color: var(--text-primary);">

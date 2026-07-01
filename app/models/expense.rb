@@ -5,10 +5,6 @@ class Expense < ApplicationRecord
   unless defined_enums.key?("record_type")
     enum :record_type, { expense: 0, settlement: 1 }, instance_methods: false
   end
-  unless defined_enums.key?("category")
-    enum :category, { general: 0, food: 1, transport: 2, entertainment: 3,
-                       utilities: 4, rent: 5, shopping: 6, healthcare: 7, other_category: 8 }
-  end
   unless defined_enums.key?("split_type")
     enum :split_type, { equal: 0, exact: 1, percentage: 2, adjustment: 3 }
   end
@@ -19,17 +15,18 @@ class Expense < ApplicationRecord
   # upload img as proof
   has_one_attached :proof
 
-
+  belongs_to :category
   belongs_to :group
   belongs_to :created_by, class_name: "User"
   belongs_to :paid_by, class_name: "User", optional: true
   has_many :expense_splits, dependent: :destroy
+  
   validates :title, presence: true, length: { maximum: 255 }
   validates :total_amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :currency, presence: true, length: { is: 3 }
   validates :expense_date, presence: true
   validates :record_type, presence: true
-  validates :category, presence: true
+  validates :category_id, presence: true
   validates :split_type, presence: true
 
   scope :active_records, -> { where(status: :active) }

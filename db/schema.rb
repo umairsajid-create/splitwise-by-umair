@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_01_085707) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_01_123031) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_085707) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "categories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "icon"
+    t.string "name"
+    t.string "section"
+    t.datetime "updated_at", null: false
+  end
+
   create_table "default_splits", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "group_id", null: false
@@ -68,7 +76,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_085707) do
   end
 
   create_table "expenses", force: :cascade do |t|
-    t.integer "category", default: 0, null: false, comment: "0:general, 1:food, 2:transport, etc."
+    t.integer "category_id"
     t.datetime "created_at", null: false
     t.bigint "created_by_id", null: false
     t.string "currency", default: "PKR", null: false
@@ -84,7 +92,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_085707) do
     t.string "title", null: false
     t.integer "total_amount_cents", null: false
     t.datetime "updated_at", null: false
-    t.index ["category"], name: "index_expenses_on_category"
     t.index ["created_by_id"], name: "index_expenses_on_created_by_id"
     t.index ["expense_date"], name: "index_expenses_on_expense_date"
     t.index ["group_id"], name: "index_expenses_on_group_id"
@@ -130,6 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_085707) do
     t.integer "group_type", default: 0, null: false, comment: "0:home, 1:trip, 2:couple, 3:other"
     t.boolean "is_active", default: true, null: false
     t.string "name", null: false
+    t.boolean "simplify_debts", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_groups_on_creator_id"
     t.index ["is_active"], name: "index_groups_on_is_active"
