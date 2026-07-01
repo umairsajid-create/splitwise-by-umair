@@ -19,37 +19,38 @@ class GroupsController < ApplicationController
 
     @my_balance_cents = @balances.find { |b| b[:user] == current_user }&.dig(:balance_cents) || 0
 
-    # this handles multi-payer expenses natively since it just relies on net balances
-    creditors = @balances.select { |b| b[:balance_cents] > 0 }.map(&:dup)
-    debtors   = @balances.select { |b| b[:balance_cents] < 0 }.map(&:dup)
+    if @group.simplify_debts?
+      # work on net balance not on expense
+      creditors = @balances.select { |b| b[:balance_cents] > 0 }.map(&:dup)
+      debtors   = @balances.select { |b| b[:balance_cents] < 0 }.map(&:dup)
 
-    transactions = []
+      transactions = []
 
-    while creditors.any? && debtors.any?
-      creditor = creditors.first
-      debtor   = debtors.last # debtors are sorted desc, so last is most negative
-      # .min bcz debtors never pay more then creditor owe him
-      amount = [ creditor[:balance_cents], debtor[:balance_cents].abs ].min
+      while creditors.any? && debtors.any?
+        creditor = creditors.first
+        debtor   = debtors.last
+        amount = [ creditor[:balance_cents], debtor[:balance_cents].abs ].min
 
-      transactions << { from: debtor[:user], to: creditor[:user], amount: amount }
+        transactions << { from: debtor[:user], to: creditor[:user], amount: amount }
 
-      creditor[:balance_cents] -= amount
-      debtor[:balance_cents]   += amount
+        creditor[:balance_cents] -= amount
+        debtor[:balance_cents]   += amount
 
-      creditors.shift if creditor[:balance_cents] == 0
-      debtors.pop     if debtor[:balance_cents]   == 0
-    end
-
-    # extract only transactions involving the current_user
-    @my_balance_detail = []
-    transactions.each do |t|
-      if t[:from] == current_user
-        # I owe them
-        @my_balance_detail << { user: t[:to], net_cents: -t[:amount] }
-      elsif t[:to] == current_user
-        # They owe me
-        @my_balance_detail << { user: t[:from], net_cents: t[:amount] }
+        creditors.shift if creditor[:balance_cents] == 0
+        debtors.pop     if debtor[:balance_cents]   == 0
       end
+
+      @my_balance_detail = []
+      transactions.each do |t|
+        if t[:from] == current_user
+          @my_balance_detail << { user: t[:to], net_cents: -t[:amount] }
+        elsif t[:to] == current_user
+          @my_balance_detail << { user: t[:from], net_cents: t[:amount] }
+        end
+      end
+    else
+      # work on expense (no cross-expense simplification)
+      @my_balance_detail = Groups::BilateralBalancesService.new(@group, current_user).call
     end
   end
 
@@ -107,6 +108,6 @@ class GroupsController < ApplicationController
   end
 
   def group_params
-    params.require(:group).permit(:name, :group_type, :avatar)
+    params.require(:group).permit(:name, :group_type, :avatar, :simplify_debts)
   end
 end

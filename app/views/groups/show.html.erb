@@ -118,7 +118,7 @@
   <div class="tabs" id="group-tabs">
     <button class="tab tab--active" data-tab="expenses" onclick="switchTab('expenses')">Expenses</button>
     <button class="tab" data-tab="balances" onclick="switchTab('balances')">Balances</button>
-    <button class="tab" data-tab="members" onclick="switchTab('members')">Members</button>
+    <button class="tab" data-tab="settings" onclick="switchTab('settings')">Settings</button>
   </div>
 
   <%# Tab: Expenses %>
@@ -214,8 +214,8 @@
     <% end %>
   </div>
 
-  <%# Tab: Members %>
-  <div id="tab-members" class="tab-panel" style="display:none;">
+  <%# Tab: Settings (formerly Members) %>
+  <div id="tab-settings" class="tab-panel" style="display:none;">
     <% if @pending_invitations.any? %>
       <div class="card card--shadow mb-md">
         <div class="p-md" style="border-bottom: 1px solid var(--border-subtle);">
@@ -239,6 +239,7 @@
       </div>
     <% end %>
 
+    <%# Member list %>
     <div class="card card--shadow">
       <% @members.each do |gm| %>
         <div class="list-item">
@@ -275,6 +276,41 @@
         </div>
       <% end %>
     </div>
+
+    <%# ── GROUP SETTINGS ─────────────────────────────────── %>
+    <% if @group.admin?(current_user) %>
+      <div style="margin-top: var(--space-lg, 20px);">
+        <div class="section-header">
+          <h3 class="section-title">Group Settings</h3>
+        </div>
+        <div class="card card--shadow">
+          <div class="list-item" style="padding: 16px 20px;">
+            <div class="list-item__body">
+              <div class="list-item__title">Simplify group debts</div>
+              <div class="list-item__subtitle" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                Reduces the number of transactions between members.
+                Instead of tracking who paid whom, debts are combined so
+                each person makes only one payment.
+              </div>
+            </div>
+            <div class="list-item__meta" style="flex-shrink: 0;">
+              <%= form_with model: @group, url: group_path(@group), method: :patch, local: true,
+                    html: { id: "simplify-debts-form", style: "margin:0;" } do |f| %>
+                <label class="toggle-switch" for="simplify_debts_toggle">
+                  <%= f.check_box :simplify_debts,
+                        id: "simplify_debts_toggle",
+                        checked: @group.simplify_debts?,
+                        onchange: "this.form.submit();",
+                        class: "toggle-switch__input" %>
+                  <span class="toggle-switch__slider"></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
 
     <div class="mt-md">
       <%= link_to group_membership_path(@group), class: "btn btn--outline btn--block btn--sm", style: "color: var(--color-negative); border-color: var(--color-negative);" do %>
