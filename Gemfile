@@ -67,7 +67,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   # RSpec testing framework (replaces default minitest)
-  gem "rspec-rails", "~> 7.1"
+  gem "rspec-rails", "~> 8.0"
 
   # Test data factories (create test objects easily)
   gem "factory_bot_rails", "~> 6.4"
