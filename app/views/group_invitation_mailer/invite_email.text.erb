@@ -1,0 +1,38 @@
+💸 Splitwise — Group Invitation
+=====================================
+
+Hi there!
+
+<%= @invited_by.username %> (<%= @invited_by.email %>) has invited you to join
+the group "<%= @group.name %>" on Splitwise.
+
+GROUP DETAILS
+─────────────
+Group Name : <%= @group.name %>
+Group Type : <%= @group.group_type.capitalize %>
+Invited By : <%= @invited_by.username %>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCEPT YOUR INVITATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Click or copy this link into your browser to join the group:
+
+  <%= @accept_url %>
+
+⏰ This invitation expires on <%= @expires_at %>.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS SPLITWISE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• 💰 Track shared expenses effortlessly
+• ⚖️  Split costs equally or with custom amounts
+• 🤝 Settle debts with one click
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You received this email because <%= @invited_by.email %> invited you to Splitwise.
+If you didn't expect this, simply ignore this email — your account (if any) will not be affected.
+
+© <%= Time.current.year %> Splitwise Clone. Made with ❤️ by Umair.

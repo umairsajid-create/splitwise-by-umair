@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!--<![endif]-->
+  <title>You're invited to join <%= @group.name %></title>
+  <style type="text/css">
+    /* ── Base Reset ── */
+    * { box-sizing: border-box; }
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table { border-collapse: collapse !important; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f2f2f2; }
+
+    /* ── Wrapper fills full viewport width ── */
+    .email-outer {
+      width: 100%;
+      background-color: #f2f2f2;
+    }
+
+    /* ── Card: max-width but fills on desktop ── */
+    .email-card {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 0;
+    }
+
+    /* ── Header ── */
+    .header {
+      background-color: #0d0d0d;
+      padding: 36px 48px;
+    }
+    .header-logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #22c55e;
+      letter-spacing: -0.3px;
+      text-decoration: none;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .header-logo span {
+      color: #ffffff;
+    }
+
+    /* ── Hero band ── */
+    .hero {
+      background-color: #111111;
+      padding: 44px 48px 40px;
+      border-bottom: 3px solid #16a34a;
+    }
+    .hero-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: #22c55e;
+      margin-bottom: 14px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .hero-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 10px;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .hero-sub {
+      font-size: 15px;
+      color: #a3a3a3;
+      margin: 0;
+      line-height: 1.6;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .hero-sub strong {
+      color: #e5e5e5;
+    }
+
+    /* ── Body ── */
+    .body-section {
+      background-color: #ffffff;
+      padding: 44px 48px;
+    }
+
+    /* ── Info block ── */
+    .info-block {
+      background-color: #f9f9f9;
+      border-left: 3px solid #22c55e;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .info-block p {
+      margin: 0;
+      font-size: 15px;
+      color: #374151;
+      line-height: 1.7;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .info-block strong {
+      color: #0d0d0d;
+    }
+
+    /* ── Details rows ── */
+    .detail-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+      padding-bottom: 14px;
+    }
+    .detail-row {
+      border-top: 1px solid #f0f0f0;
+      padding: 14px 0;
+    }
+    .detail-row-key {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .detail-row-val {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+
+    /* ── CTA Button ── */
+    .cta-wrap {
+      padding: 32px 0 8px;
+      text-align: center;
+    }
+    .cta-btn {
+      display: inline-block;
+      background-color: #16a34a;
+      color: #ffffff !important;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 6px;
+      padding: 15px 40px;
+      letter-spacing: 0.3px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+      min-width: 240px;
+      text-align: center;
+    }
+
+    /* ── Expiry notice ── */
+    .expiry {
+      text-align: center;
+      padding: 14px 0 0;
+      font-size: 12px;
+      color: #9ca3af;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .expiry strong {
+      color: #6b7280;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #f0f0f0;
+      margin: 36px 0;
+    }
+
+    /* ── Fallback link ── */
+    .fallback {
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+      line-height: 1.7;
+    }
+    .fallback a {
+      color: #16a34a;
+      word-break: break-all;
+    }
+
+    /* ── Features strip ── */
+    .features {
+      background-color: #0d0d0d;
+      padding: 32px 48px;
+    }
+    .feature-item {
+      text-align: center;
+      vertical-align: top;
+      padding: 0 16px;
+    }
+    .feature-icon { font-size: 22px; margin-bottom: 8px; }
+    .feature-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .feature-desc {
+      font-size: 11px;
+      color: #6b7280;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+      margin-top: 4px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background-color: #0a0a0a;
+      padding: 24px 48px;
+      border-top: 1px solid #1f1f1f;
+    }
+    .footer p {
+      margin: 0;
+      font-size: 11px;
+      color: #4b5563;
+      text-align: center;
+      line-height: 1.7;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .footer a { color: #6b7280; text-decoration: underline; }
+    .footer .copy { color: #374151; margin-top: 10px; }
+
+    /* ══════════════════════════════
+       RESPONSIVE — MOBILE
+       ══════════════════════════════ */
+    @media screen and (max-width: 620px) {
+      .email-card { border-radius: 0 !important; }
+
+      .header  { padding: 24px 20px !important; }
+      .hero    { padding: 32px 20px 28px !important; }
+      .hero-title { font-size: 24px !important; }
+
+      .body-section { padding: 28px 20px !important; }
+      .features     { padding: 28px 20px !important; }
+      .footer        { padding: 20px 20px !important; }
+
+      .cta-btn {
+        display: block !important;
+        width: 100% !important;
+        min-width: unset !important;
+        text-align: center !important;
+        padding: 16px 20px !important;
+      }
+
+      .feature-item {
+        display: block !important;
+        width: 100% !important;
+        padding: 10px 0 !important;
+      }
+
+      /* Stack detail rows nicely */
+      .detail-row td {
+        display: block !important;
+        width: 100% !important;
+      }
+      .detail-row-val {
+        padding-top: 4px !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<!-- ████████████████████████████████████████████████████
+     OUTER WRAPPER — full viewport width background
+     ████████████████████████████████████████████████████ -->
+<table role="presentation" class="email-outer" cellspacing="0" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align="center" style="padding: 0;">
+
+      <!-- ─── EMAIL CARD ─── -->
+      <table role="presentation" class="email-card" cellspacing="0" cellpadding="0" border="0" width="680" style="max-width:680px;">
+
+        <!-- ══ LOGO HEADER ══ -->
+        <tr>
+          <td class="header">
+            <span class="header-logo">💸 Split<span>wise</span></span>
+          </td>
+        </tr>
+
+        <!-- ══ HERO BAND ══ -->
+        <tr>
+          <td class="hero">
+            <div class="hero-label">Group Invitation</div>
+            <h1 class="hero-title">You've Been Invited</h1>
+            <p class="hero-sub">
+              <strong><%= @invited_by.username %></strong> wants you to join their group on Splitwise.
+            </p>
+          </td>
+        </tr>
+
+        <!-- ══ BODY ══ -->
+        <tr>
+          <td class="body-section">
+
+            <!-- Info block -->
+            <div class="info-block">
+              <p>
+                <strong><%= @invited_by.username %></strong> (<%= @invited_by.email %>) has invited you
+                to join the group <strong>"<%= @group.name %>"</strong> — where you can track and split
+                shared expenses together.
+              </p>
+            </div>
+
+            <!-- Details table -->
+            <p class="detail-label">Invitation Details</p>
+
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr class="detail-row">
+                <td class="detail-row-key" width="40%">Group Name</td>
+                <td class="detail-row-val"><%= @group.name %></td>
+              </tr>
+              <tr class="detail-row">
+                <td class="detail-row-key" width="40%">Type</td>
+                <td class="detail-row-val"><%= @group.group_type.capitalize %></td>
+              </tr>
+              <tr class="detail-row">
+                <td class="detail-row-key" width="40%">Invited By</td>
+                <td class="detail-row-val"><%= @invited_by.username %></td>
+              </tr>
+              <tr class="detail-row">
+                <td class="detail-row-key" width="40%">Expires</td>
+                <td class="detail-row-val" style="color:#dc2626;"><%= @expires_at %></td>
+              </tr>
+            </table>
+
+            <!-- CTA -->
+            <div class="cta-wrap">
+              <a href="<%= @accept_url %>" class="cta-btn">Accept Invitation &rarr;</a>
+            </div>
+
+            <p class="expiry">
+              ⏰ This invitation link expires on <strong><%= @expires_at %></strong>
+            </p>
+
+            <hr class="divider" />
+
+            <!-- Fallback link -->
+            <p class="fallback">
+              Button not working? Paste this link in your browser:<br />
+              <a href="<%= @accept_url %>"><%= @accept_url %></a>
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- ══ FEATURES STRIP ══ -->
+        <tr>
+          <td class="features">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td class="feature-item" width="33%">
+                  <div class="feature-icon">💰</div>
+                  <div class="feature-title">Track</div>
+                  <div class="feature-desc">Log shared costs</div>
+                </td>
+                <td class="feature-item" width="33%">
+                  <div class="feature-icon" style="color:#22c55e;">⚖️</div>
+                  <div class="feature-title">Split</div>
+                  <div class="feature-desc">Equal or custom</div>
+                </td>
+                <td class="feature-item" width="33%">
+                  <div class="feature-icon">🤝</div>
+                  <div class="feature-title">Settle</div>
+                  <div class="feature-desc">Clear debts fast</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ══ FOOTER ══ -->
+        <tr>
+          <td class="footer">
+            <p>
+              You received this because <strong style="color:#6b7280;"><%= @invited_by.email %></strong>
+              invited you to Splitwise.
+              If you didn't expect this, you can safely ignore it.
+            </p>
+            <p class="copy">
+              &copy; <%= Time.current.year %> Splitwise &nbsp;&bull;&nbsp;
+              <a href="mailto:<%= ENV.fetch("MAIL_FROM", "noreply@splitwise.app") %>">Contact Support</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      <!-- ─── END EMAIL CARD ─── -->
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

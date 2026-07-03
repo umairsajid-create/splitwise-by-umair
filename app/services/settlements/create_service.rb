@@ -21,7 +21,7 @@ module Settlements
           created_by:         @payer,
           paid_by:            @payer,
           record_type:        :settlement,
-          category:           :general,
+          category:           Category.find_by(name: "General") || Category.first,
           title:              "Settlement: #{@payer.username} → #{@receiver.username}",
           total_amount_cents: @amount_cents,
           currency:           @currency,

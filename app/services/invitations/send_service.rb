@@ -25,12 +25,17 @@ module Invitations
         existing.destroy!
       end
 
-      @group.invitations.create!(
+      invitation = @group.invitations.create!(
         invited_by:  @invited_by,
         email:       @email,
         status:      :pending,
         expires_at:  7.days.from_now
       )
+
+      # Enqueue invitation email to be sent asynchronously via Sidekiq
+      InvitationMailerJob.perform_later(invitation.id)
+
+      invitation
     end
   end
 end

@@ -10,7 +10,7 @@ module Expenses
       user_ids = @expense.expense_splits.pluck(:user_id)
 
       Expense.transaction do
-        @expense.update!(status: :deleted)   # Soft delete
+        @expense.soft_delete!   # Soft delete & trigger search reindex
         recalculate_balances(user_ids)
       end
 

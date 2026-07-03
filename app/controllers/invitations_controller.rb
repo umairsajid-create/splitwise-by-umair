@@ -23,8 +23,7 @@ class InvitationsController < ApplicationController
     ).call
 
     # We will simulate the email being sent for now by flashing the link
-    link = accept_invitation_url(token: invitation.token)
-    redirect_to @group, notice: "Invitation created! (Since email is disabled, send them this link: #{link})"
+    redirect_to @group, notice: "Invitation sent to #{params[:email]}! They'll receive an email with a join link shortly."
   end
 
   def accept

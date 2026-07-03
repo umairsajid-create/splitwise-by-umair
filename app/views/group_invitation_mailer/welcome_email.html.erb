@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <title>Welcome to <%= @group.name %>!</title>
+  <style type="text/css">
+    * { box-sizing: border-box; }
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table { border-collapse: collapse !important; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f2f2f2; }
+
+    .email-outer { width: 100%; background-color: #f2f2f2; }
+
+    .email-card {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+
+    /* ── Header ── */
+    .header {
+      background-color: #0d0d0d;
+      padding: 36px 48px;
+    }
+    .header-logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #22c55e;
+      letter-spacing: -0.3px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .header-logo span { color: #ffffff; }
+
+    /* ── Hero ── */
+    .hero {
+      background-color: #111111;
+      padding: 44px 48px 40px;
+      border-bottom: 3px solid #16a34a;
+    }
+    .hero-badge {
+      display: inline-block;
+      background-color: #16a34a;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 3px;
+      margin-bottom: 18px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .hero-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 10px;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .hero-sub {
+      font-size: 15px;
+      color: #a3a3a3;
+      margin: 0;
+      line-height: 1.6;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .hero-sub strong { color: #22c55e; }
+
+    /* ── Body ── */
+    .body-section {
+      background-color: #ffffff;
+      padding: 44px 48px;
+    }
+    .greeting {
+      font-size: 16px;
+      color: #374151;
+      line-height: 1.7;
+      margin: 0 0 32px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .greeting strong { color: #0d0d0d; }
+
+    /* ── Checklist ── */
+    .checklist-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+      margin-bottom: 16px;
+    }
+    .checklist {
+      background-color: #f9f9f9;
+      border-left: 3px solid #22c55e;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 36px;
+    }
+    .checklist-row {
+      padding: 8px 0;
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.5;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .checklist-row strong { color: #111111; }
+    .check-icon {
+      color: #16a34a;
+      font-weight: 700;
+      margin-right: 10px;
+      font-size: 15px;
+    }
+
+    /* ── CTA ── */
+    .cta-wrap { text-align: center; padding: 0 0 36px; }
+    .cta-btn {
+      display: inline-block;
+      background-color: #16a34a;
+      color: #ffffff !important;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 6px;
+      padding: 15px 40px;
+      letter-spacing: 0.3px;
+      min-width: 240px;
+      text-align: center;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid #f0f0f0; margin: 0 0 28px; }
+
+    /* ── Group stat strip ── */
+    .stat-strip {
+      text-align: center;
+      padding: 0 0 8px;
+    }
+    .stat-pill {
+      display: inline-block;
+      background-color: #f3f4f6;
+      border-radius: 4px;
+      padding: 8px 16px;
+      margin: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .stat-pill span { color: #16a34a; }
+
+    /* ── Features strip ── */
+    .features {
+      background-color: #0d0d0d;
+      padding: 32px 48px;
+    }
+    .feature-item { text-align: center; vertical-align: top; padding: 0 16px; }
+    .feature-icon { font-size: 22px; margin-bottom: 8px; }
+    .feature-title {
+      font-size: 13px; font-weight: 700; color: #ffffff;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .feature-desc {
+      font-size: 11px; color: #6b7280; margin-top: 4px;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background-color: #0a0a0a;
+      padding: 24px 48px;
+      border-top: 1px solid #1f1f1f;
+    }
+    .footer p {
+      margin: 0; font-size: 11px; color: #4b5563;
+      text-align: center; line-height: 1.7;
+      font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif;
+    }
+    .footer a { color: #6b7280; text-decoration: underline; }
+    .footer .copy { color: #374151; margin-top: 10px; }
+
+    /* ══════════════════════
+       MOBILE RESPONSIVE
+       ══════════════════════ */
+    @media screen and (max-width: 620px) {
+      .email-card { border-radius: 0 !important; }
+      .header   { padding: 24px 20px !important; }
+      .hero     { padding: 32px 20px 28px !important; }
+      .hero-title { font-size: 24px !important; }
+      .body-section { padding: 28px 20px !important; }
+      .features { padding: 28px 20px !important; }
+      .footer   { padding: 20px 20px !important; }
+
+      .cta-btn {
+        display: block !important;
+        width: 100% !important;
+        min-width: unset !important;
+        padding: 16px 20px !important;
+      }
+      .feature-item {
+        display: block !important;
+        width: 100% !important;
+        padding: 10px 0 !important;
+      }
+      .stat-pill { display: block !important; margin: 6px 0 !important; }
+    }
+  </style>
+</head>
+
+<body>
+<table role="presentation" class="email-outer" cellspacing="0" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align="center" style="padding: 0;">
+
+      <table role="presentation" class="email-card" cellspacing="0" cellpadding="0" border="0" width="680" style="max-width:680px;">
+
+        <!-- ══ LOGO HEADER ══ -->
+        <tr>
+          <td class="header">
+            <span class="header-logo">💸 Split<span>wise</span></span>
+          </td>
+        </tr>
+
+        <!-- ══ HERO ══ -->
+        <tr>
+          <td class="hero">
+            <div class="hero-badge">✓ Joined Successfully</div>
+            <h1 class="hero-title">Welcome to the Group!</h1>
+            <p class="hero-sub">
+              You are now a member of <strong>"<%= @group.name %>"</strong>
+            </p>
+          </td>
+        </tr>
+
+        <!-- ══ BODY ══ -->
+        <tr>
+          <td class="body-section">
+
+            <p class="greeting">
+              Hey <strong><%= @user.username %></strong>! 👋<br />
+              You have successfully joined <strong>"<%= @group.name %>"</strong>.
+              You can now start adding expenses, tracking balances, and settling up with your group members.
+            </p>
+
+            <!-- Checklist -->
+            <p class="checklist-title">What you can do now</p>
+            <div class="checklist">
+              <div class="checklist-row">
+                <span class="check-icon">✓</span>
+                <strong>Add an expense</strong> — log what you paid and split it with the group
+              </div>
+              <div class="checklist-row">
+                <span class="check-icon">✓</span>
+                <strong>View balances</strong> — see exactly who owes what at a glance
+              </div>
+              <div class="checklist-row">
+                <span class="check-icon">✓</span>
+                <strong>Settle up</strong> — mark debts as paid when you're all square
+              </div>
+              <div class="checklist-row">
+                <span class="check-icon">✓</span>
+                <strong>Invite others</strong> — add more people to the group
+              </div>
+            </div>
+
+            <!-- Stat pills -->
+            <div class="stat-strip">
+              <span class="stat-pill">Group: <span><%= @group.name %></span></span>
+              <span class="stat-pill">Type: <span><%= @group.group_type.capitalize %></span></span>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-wrap" style="padding-top:28px;">
+              <a href="<%= @group_url %>" class="cta-btn">Open Group &rarr;</a>
+            </div>
+
+            <hr class="divider" />
+
+            <p style="text-align:center; font-size:12px; color:#9ca3af; font-family:'Segoe UI',Helvetica Neue,Arial,sans-serif; margin:0;">
+              This link takes you directly to your group dashboard.
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- ══ FEATURES STRIP ══ -->
+        <tr>
+          <td class="features">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td class="feature-item" width="33%">
+                  <div class="feature-icon">💰</div>
+                  <div class="feature-title">Track</div>
+                  <div class="feature-desc">Log shared costs</div>
+                </td>
+                <td class="feature-item" width="33%">
+                  <div class="feature-icon">⚖️</div>
+                  <div class="feature-title">Split</div>
+                  <div class="feature-desc">Equal or custom</div>
+                </td>
+                <td class="feature-item" width="33%">
+                  <div class="feature-icon">🤝</div>
+                  <div class="feature-title">Settle</div>
+                  <div class="feature-desc">Clear debts fast</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ══ FOOTER ══ -->
+        <tr>
+          <td class="footer">
+            <p>
+              This email was sent to <strong style="color:#6b7280;"><%= @user.email %></strong>
+              because you accepted a Splitwise group invitation.
+            </p>
+            <p class="copy">
+              &copy; <%= Time.current.year %> Splitwise &nbsp;&bull;&nbsp;
+              <a href="mailto:<%= ENV.fetch("MAIL_FROM", "noreply@splitwise.app") %>">Contact Support</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+</body>
+</html>

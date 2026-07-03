@@ -96,3 +96,8 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "dotenv-rails", "~> 3.2"
+
+# SendGrid email delivery via Web API v3
+gem "sendgrid-actionmailer", "~> 3.2"

@@ -32,14 +32,27 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # SendGrid delivery via Web API v3
+  config.action_mailer.delivery_method = :sendgrid_actionmailer
+  config.action_mailer.sendgrid_actionmailer_settings = {
+    api_key: ENV.fetch("SENDGRID_API_KEY"),
+    raise_delivery_errors: true
+  }
+
+  # Raise delivery errors in development so we catch misconfigurations early.
+  config.action_mailer.raise_delivery_errors = true
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
   # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost"), port: 3000 }
+
+  # Enable mailer previews at /rails/mailers
+  config.action_mailer.show_previews = true
+  config.action_mailer.preview_paths = [
+    Rails.root.join("test/mailers/previews").to_s
+  ]
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
