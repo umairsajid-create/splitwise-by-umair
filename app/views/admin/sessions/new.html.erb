@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Admin Sign In — Splitwise</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <%= csrf_meta_tags %>
+  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-wrap { width: 100%; max-width: 400px; padding: 24px; }
+    .login-card {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 40px;
+    }
+    .login-brand { text-align: center; margin-bottom: 32px; }
+    .login-brand__logo { font-size: 28px; font-weight: 800; color: #22c55e; letter-spacing: -0.5px; }
+    .login-brand__logo span { color: #fff; }
+    .login-brand__sub { font-size: 11px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: #6b7280; margin-top: 6px; }
+    .login-card h1 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .login-card p  { font-size: 13px; color: #6b7280; margin-bottom: 28px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+    .form-group input {
+      width: 100%; padding: 10px 14px; font-size: 14px;
+      background: #1a1a1a; border: 1px solid #333; color: #fff;
+      border-radius: 6px; outline: none;
+    }
+    .form-group input:focus { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,0.15); }
+    .login-btn {
+      width: 100%; padding: 12px; font-size: 14px; font-weight: 700;
+      background: #16a34a; color: #fff; border: none; border-radius: 6px;
+      cursor: pointer; margin-top: 8px; transition: background 0.15s;
+    }
+    .login-btn:hover { background: #15803d; }
+    .flash-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; font-size: 13px; margin-bottom: 20px; }
+    .remember { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: #9ca3af; }
+    .remember input { width: auto; }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="login-brand__logo">⬡ Split<span>wise</span></div>
+      <div class="login-brand__sub">Admin Panel</div>
+    </div>
+
+    <div class="login-card">
+      <h1>Sign In</h1>
+      <p>Administrator access only</p>
+
+      <% if flash[:alert] %>
+        <div class="flash-error"><%= flash[:alert] %></div>
+      <% end %>
+
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { data: { turbo: false } }) do |f| %>
+        <div class="form-group">
+          <%= f.label :email, "Email" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email",
+              placeholder: "admin@example.com" %>
+        </div>
+        <div class="form-group">
+          <%= f.label :password, "Password" %>
+          <%= f.password_field :password, autocomplete: "current-password",
+              placeholder: "••••••••" %>
+        </div>
+        <div class="remember">
+          <%= f.check_box :remember_me %>
+          <%= f.label :remember_me, "Remember me" %>
+        </div>
+        <%= f.submit "Sign In →", class: "login-btn" %>
+      <% end %>
+    </div>
+  </div>
+</body>
+</html>

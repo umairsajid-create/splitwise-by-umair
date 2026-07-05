@@ -1,55 +1,86 @@
-<% content_for :title, "Admin Users — Splitwise" %>
+<% content_for :page_title, "Users" %>
 
-<% content_for :top_bar do %>
-  <%= render "shared/top_bar", title: "User security", back_path: admin_root_path %>
+<div class="adm-page-header">
+  <h1>User Management</h1>
+  <p>Search, filter, block, promote, and manage all platform users.</p>
+</div>
+
+<!-- Filter bar -->
+<%= form_with url: admin_users_path, method: :get, local: true do |f| %>
+  <div class="adm-filter-bar">
+    <%= f.text_field :q, value: params[:q], placeholder: "Search username or email…", class: "adm-input", style: "flex:1;min-width:200px;" %>
+    <%= f.select :role, [["All Roles",""],["Simple","simple"],["Premium","premium"]], {selected: params[:role]}, class: "adm-select" %>
+    <%= f.select :blocked, [["Any Status",""],["Blocked only","true"]], {selected: params[:blocked]}, class: "adm-select" %>
+    <%= f.submit "Filter", class: "adm-btn adm-btn--outline" %>
+    <%= link_to "Clear", admin_users_path, class: "adm-btn adm-btn--ghost" %>
+  </div>
 <% end %>
 
-<div class="animate-fade-in admin-page">
-  <div class="admin-page__header mb-md">
-    <h1 class="page-heading mb-xs">User security</h1>
-    <p class="text-muted text-sm">Block users to prevent them from adding expenses or recording settlements.</p>
+<div class="adm-card">
+  <div class="adm-card__header">
+    <span class="adm-card__title">Users (<%= @users.count %>)</span>
   </div>
-
-  <div class="card card--shadow">
-    <% @users.each do |user| %>
-      <div class="list-item admin-user-row">
-        <div class="avatar avatar--sm avatar--teal"><%= user.username.first.upcase %></div>
-
-        <div class="list-item__body">
-          <div class="list-item__title">
-            <%= user.username %>
-            <span class="badge badge--<%= user.role %>"><%= user.role %></span>
-            <% if user.blocked? %>
-              <span class="badge badge--blocked">Blocked</span>
-            <% end %>
-          </div>
-          <div class="list-item__subtitle text-muted"><%= user.email %></div>
-        </div>
-
-        <div class="admin-user-row__actions">
-          <% if user == current_user %>
-            <span class="text-muted text-sm">You</span>
-          <% elsif user.admin? %>
-            <span class="text-muted text-sm">Protected</span>
-          <% elsif user.blocked? %>
-            <%= button_to "Unblock",
-                  unblock_admin_user_path(user),
-                  method: :patch,
-                  class: "btn btn--outline btn--sm",
-                  data: { turbo: false } %>
-          <% else %>
-            <%= button_to "Block",
-                  block_admin_user_path(user),
-                  method: :patch,
-                  class: "btn btn--danger btn--sm",
-                  data: { turbo: false, turbo_confirm: "Block #{user.username}? They cannot add expenses or settlements." } %>
+  <div class="adm-card__body">
+    <% if @users.any? %>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="adm-avatar"><%= user.username.first.upcase %></div>
+                  <div>
+                    <div style="font-weight:600;color:#111;"><%= link_to user.username, admin_user_path(user), style:"color:inherit;text-decoration:none;" %></div>
+                    <div style="font-size:12px;color:#9ca3af;"><%= user.email %></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="adm-badge <%= user.premium? ? 'adm-badge--blue' : 'adm-badge--gray' %>">
+                  <%= user.role.capitalize %>
+                </span>
+              </td>
+              <td>
+                <% if user.blocked? %>
+                  <span class="adm-badge adm-badge--red">Blocked</span>
+                <% else %>
+                  <span class="adm-badge adm-badge--green">Active</span>
+                <% end %>
+              </td>
+              <td style="font-size:12px;color:#9ca3af;"><%= user.created_at.strftime("%b %d, %Y") %></td>
+              <td>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <%= link_to "View", admin_user_path(user), class: "adm-btn adm-btn--outline" %>
+                  <% if user.blocked? %>
+                    <%= button_to "Unblock", unblock_admin_user_path(user), method: :patch, class: "adm-btn adm-btn--green", data: { turbo: false } %>
+                  <% else %>
+                    <%= button_to "Block", block_admin_user_path(user), method: :patch, class: "adm-btn adm-btn--red", data: { turbo: false, turbo_confirm: "Block #{user.username}?" } %>
+                  <% end %>
+                  <% unless user.premium? %>
+                    <%= button_to "→ Premium", promote_admin_user_path(user), method: :patch, class: "adm-btn adm-btn--outline", data: { turbo: false } %>
+                  <% else %>
+                    <%= button_to "→ Simple", demote_admin_user_path(user), method: :patch, class: "adm-btn adm-btn--ghost", data: { turbo: false } %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
           <% end %>
-        </div>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="adm-empty">
+        <div class="adm-empty__icon">👥</div>
+        No users found matching your filters.
       </div>
     <% end %>
-  </div>
-
-  <div class="mt-md">
-    <%= link_to "← Analytics", admin_root_path, class: "btn btn--ghost btn--sm" %>
   </div>
 </div>

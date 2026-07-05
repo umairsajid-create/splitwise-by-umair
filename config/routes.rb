@@ -3,13 +3,21 @@
 require "sidekiq/web"
 
 Rails.application.routes.draw do
+  # ── User Auth
   devise_for :users, controllers: {
     registrations: "users/registrations"
   }
 
+  # ── Admin Auth
+  devise_for :admin_users, path: "admin", path_names: {
+    sign_in:  "sign_in",
+    sign_out: "sign_out"
+  }, controllers: {
+    sessions: "admin/sessions"
+  }
+
   root "dashboard#index"
 
-  # all routes happen under groups/ as groups is the main entity
   resources :groups do
     member do
       get :delete
@@ -32,16 +40,46 @@ Rails.application.routes.draw do
 
   resource :profile, only: [ :show, :edit, :update ]
 
-  # admin routes where it see analytics and control user
+  # ── Admin Panel ─────────────────────────────────────────────────────
+  # All routes under /admin — all controllers inherit Admin::BaseController
   namespace :admin do
     root to: "analytics#index"
     get "analytics", to: "analytics#index"
-    resources :users, only: [ :index ] do
+
+    # User management
+    resources :users, only: [ :index, :show ] do
       member do
         patch :block
         patch :unblock
+        patch :promote
+        patch :demote
+        post  :reset_password
       end
     end
+
+    # Groups
+    resources :groups, only: [ :index, :show ] do
+      member do
+        patch :archive
+        patch :restore
+      end
+    end
+
+    # Expense
+    resources :expenses, only: [ :index, :destroy ]
+
+    # Invitations
+    resources :invitations, only: [ :index ] do
+      member do
+        patch :expire
+      end
+    end
+
+    # Unified activity log
+    get "activity", to: "activity#index", as: :activity
+
+    # Admin's own account settings
+    resource :account, only: [ :show, :update ], controller: "account"
   end
 
   mount Sidekiq::Web, at: "/sidekiq"

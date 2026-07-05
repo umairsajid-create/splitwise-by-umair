@@ -1,0 +1,81 @@
+<% content_for :page_title, "Activity & Global Search" %>
+
+<div class="adm-page-header">
+  <h1>Global Expense Search</h1>
+  <p>Search all platform expenses using Elasticsearch.</p>
+</div>
+
+<%= form_with url: admin_activity_path, method: :get, local: true do |f| %>
+  <div class="adm-filter-bar">
+    <%= text_field_tag :q, @query, placeholder: "Search global expenses, notes, groups...", class: "adm-input", style: "flex: 1;" %>
+    <%= submit_tag "Search", class: "adm-btn adm-btn--primary" %>
+    <% if @query.present? %>
+      <%= link_to "Clear", admin_activity_path, class: "adm-btn adm-btn--ghost" %>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="adm-card">
+  <div class="adm-card__header">
+    <span class="adm-card__title">Search Results (<%= @activities.total_count rescue @activities.size %>)</span>
+    <% if @using_elasticsearch %>
+      <span class="adm-badge adm-badge--green" style="margin-left: 10px;">⚡ Elasticsearch Active</span>
+    <% elsif @query.present? %>
+      <span class="adm-badge adm-badge--gray" style="margin-left: 10px;">SQL Fallback</span>
+    <% end %>
+  </div>
+  
+  <div class="adm-card__body">
+    <% if @activities.any? %>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Expense</th>
+            <th>Amount</th>
+            <th>Creator</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @activities.each do |expense| %>
+            <tr>
+              <td>
+                <% if expense.group %>
+                  <%= link_to expense.group.name, admin_group_path(expense.group), class: "adm-badge adm-badge--gray", style: "text-decoration: none;" %>
+                <% else %>
+                  <span class="adm-badge" style="background: transparent; border: 1px solid #333; color: #9ca3af;">Non-Group</span>
+                <% end %>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 16px;"><%= expense.category&.icon || "🧾" %></span>
+                  <span><%= expense.title %></span>
+                </div>
+              </td>
+              <td style="font-weight: bold; color: #22c55e;">
+                <%= number_to_currency(expense.total_amount_cents / 100.0, unit: expense.currency + " ") %>
+              </td>
+              <td><%= expense.created_by&.username || "Unknown" %></td>
+              <td style="font-size: 12px; color: #9ca3af;">
+                <%= expense.expense_date&.strftime("%b %d, %Y") %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <div style="padding: 16px; border-top: 1px solid #222; display: flex; justify-content: center;">
+        <%= paginate @activities %>
+      </div>
+    <% else %>
+      <div class="adm-empty">
+        <div class="adm-empty__icon">🔍</div>
+        <% if @query.present? %>
+          No expenses match your search.
+        <% else %>
+          No expenses found on the platform.
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

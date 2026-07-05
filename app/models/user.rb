@@ -5,7 +5,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  enum :role, { simple: 0, premium: 1, admin: 2 }
+  enum :role, { simple: 0, premium: 1 }
 
   # profile pic
   has_one_attached :avatar
@@ -41,12 +41,11 @@ class User < ApplicationRecord
 
 
   scope :premium_users, -> { where(role: :premium) }
-  scope :admins, -> { where(role: :admin) }
-  scope :simple_users, -> { where(role: :simple) }
+  scope :simple_users,  -> { where(role: :simple) }
 
   # Instance Methods
-  def premium_or_admin?
-    premium? || admin?
+  def premium?
+    role == "premium"
   end
 
   def can_create_expense_today?

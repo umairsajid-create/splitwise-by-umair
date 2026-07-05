@@ -1,0 +1,75 @@
+<% content_for :page_title, "Invitations" %>
+
+<div class="adm-page-header">
+  <h1>Invitations</h1>
+  <p>Track all group invitations sent across the platform.</p>
+</div>
+
+<!-- KPI Cards -->
+<div class="adm-stats-grid">
+  <div class="adm-stat">
+    <div class="adm-stat__label">Pending</div>
+    <div class="adm-stat__value" style="color:#d97706;"><%= @counts[:pending] %></div>
+  </div>
+  <div class="adm-stat adm-stat--green">
+    <div class="adm-stat__label">Accepted</div>
+    <div class="adm-stat__value"><%= @counts[:accepted] %></div>
+  </div>
+  <div class="adm-stat adm-stat--red">
+    <div class="adm-stat__label">Declined</div>
+    <div class="adm-stat__value"><%= @counts[:declined] %></div>
+  </div>
+  <div class="adm-stat">
+    <div class="adm-stat__label">Expired</div>
+    <div class="adm-stat__value"><%= @counts[:expired] %></div>
+  </div>
+</div>
+
+<%= form_with url: admin_invitations_path, method: :get, local: true do |f| %>
+  <div class="adm-filter-bar">
+    <%= f.select :status, [["All Statuses",""],["Pending","pending"],["Accepted","accepted"],["Declined","declined"],["Expired","expired"]], {selected: params[:status]}, class: "adm-select" %>
+    <%= f.submit "Filter", class: "adm-btn adm-btn--outline" %>
+    <%= link_to "Clear", admin_invitations_path, class: "adm-btn adm-btn--ghost" %>
+  </div>
+<% end %>
+
+<div class="adm-card">
+  <div class="adm-card__header"><span class="adm-card__title">Invitations (<%= @invitations.count %>)</span></div>
+  <div class="adm-card__body">
+    <% if @invitations.any? %>
+      <table class="adm-table">
+        <thead>
+          <tr><th>Email</th><th>Group</th><th>Invited By</th><th>Status</th><th>Sent Date</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% @invitations.each do |inv| %>
+            <tr>
+              <td style="font-weight:600;"><%= inv.email %></td>
+              <td style="font-size:12px;color:#9ca3af;"><%= inv.group&.name %></td>
+              <td style="font-size:12px;color:#9ca3af;"><%= inv.invited_by&.username %></td>
+              <td>
+                <% badge_class = case inv.status
+                   when "pending" then "adm-badge--amber"
+                   when "accepted" then "adm-badge--green"
+                   when "declined" then "adm-badge--red"
+                   else "adm-badge--gray"
+                   end %>
+                <span class="adm-badge <%= badge_class %>"><%= inv.status.capitalize %></span>
+              </td>
+              <td style="font-size:12px;color:#9ca3af;"><%= inv.created_at.strftime("%b %d, %Y") %></td>
+              <td>
+                <% if inv.pending? %>
+                  <%= button_to "Expire Manually", expire_admin_invitation_path(inv), method: :patch, class: "adm-btn adm-btn--ghost", style: "color:#dc2626;", data: { turbo: false, turbo_confirm: "Expire this invitation?" } %>
+                <% else %>
+                  <span style="font-size:12px;color:#9ca3af;">-</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="adm-empty"><div class="adm-empty__icon">✉️</div>No invitations found.</div>
+    <% end %>
+  </div>
+</div>

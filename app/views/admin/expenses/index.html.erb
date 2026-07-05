@@ -1,0 +1,51 @@
+<% content_for :page_title, "Expenses" %>
+
+<div class="adm-page-header">
+  <h1>Expense Monitor</h1>
+  <p>Platform-wide expense feed. Total tracked: <strong style="color:#16a34a;">$<%= number_with_delimiter((@total_cents / 100.0).round(2)) %></strong></p>
+</div>
+
+<%= form_with url: admin_expenses_path, method: :get, local: true do |f| %>
+  <div class="adm-filter-bar">
+    <%= f.select :record_type, [["All Types",""],["Expenses","expense"],["Settlements","settlement"]], {selected: params[:record_type]}, class: "adm-select" %>
+    <%= f.date_field :from, value: params[:from], class: "adm-input" %>
+    <%= f.date_field :to, value: params[:to], class: "adm-input" %>
+    <%= f.submit "Filter", class: "adm-btn adm-btn--outline" %>
+    <%= link_to "Clear", admin_expenses_path, class: "adm-btn adm-btn--ghost" %>
+  </div>
+<% end %>
+
+<div class="adm-card">
+  <div class="adm-card__header"><span class="adm-card__title">Records (<%= @expenses.count %>)</span></div>
+  <div class="adm-card__body">
+    <% if @expenses.any? %>
+      <table class="adm-table">
+        <thead>
+          <tr><th>Title</th><th>Group</th><th>Amount</th><th>Type</th><th>By</th><th>Date</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% @expenses.each do |exp| %>
+            <tr>
+              <td style="font-weight:600;max-width:180px;"><%= exp.title %></td>
+              <td style="font-size:12px;color:#9ca3af;"><%= exp.group&.name %></td>
+              <td style="font-weight:700;color:#16a34a;">$<%= (exp.total_amount_cents / 100.0).round(2) %></td>
+              <td>
+                <span class="adm-badge <%= exp.record_type == 'settlement' ? 'adm-badge--blue' : 'adm-badge--amber' %>">
+                  <%= exp.record_type.capitalize %>
+                </span>
+              </td>
+              <td style="font-size:12px;color:#9ca3af;"><%= exp.created_by&.username %></td>
+              <td style="font-size:12px;color:#9ca3af;"><%= exp.expense_date&.strftime("%b %d") %></td>
+              <td>
+                <%= button_to "Remove", admin_expense_path(exp), method: :delete, class: "adm-btn adm-btn--red",
+                    data: { turbo: false, turbo_confirm: "Soft-delete \"#{exp.title}\"?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="adm-empty"><div class="adm-empty__icon">💰</div>No expenses found.</div>
+    <% end %>
+  </div>
+</div>

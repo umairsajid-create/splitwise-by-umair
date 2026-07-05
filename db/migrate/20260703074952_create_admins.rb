@@ -1,0 +1,11 @@
+class CreateAdmins < ActiveRecord::Migration[8.1]
+  def change
+    create_table :admins do |t|
+      t.string :username, null: false
+      # email and encrypted_password added by AddDeviseToAdmins
+      t.timestamps
+    end
+
+    add_index :admins, :username, unique: true
+  end
+end

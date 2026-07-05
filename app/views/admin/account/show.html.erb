@@ -1,0 +1,61 @@
+<% content_for :page_title, "My Account" %>
+
+<div class="adm-page-header">
+  <h1>My Account</h1>
+  <p>Manage your admin credentials. These settings apply only to the admin panel.</p>
+</div>
+
+<div class="adm-card" style="max-width:500px;">
+  <div class="adm-card__header"><span class="adm-card__title">Profile Information</span></div>
+  <div class="adm-card__body" style="padding:24px;">
+    <%= form_with model: @admin, url: admin_account_path, method: :put, local: true do |f| %>
+      <% if @admin.errors.any? %>
+        <div class="adm-flash adm-flash--alert">
+          <ul style="margin-left:20px;">
+            <% @admin.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div style="margin-bottom:16px;">
+        <%= f.label :username, "Username", style: "display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;" %>
+        <%= f.text_field :username, class: "adm-input", style: "width:100%;" %>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <%= f.label :email, "Email Address", style: "display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;" %>
+        <%= f.email_field :email, class: "adm-input", style: "width:100%;" %>
+      </div>
+
+      <%= f.submit "Update Profile", class: "adm-btn adm-btn--green" %>
+    <% end %>
+  </div>
+</div>
+
+<div class="adm-card" style="max-width:500px;">
+  <div class="adm-card__header"><span class="adm-card__title">Change Password</span></div>
+  <div class="adm-card__body" style="padding:24px;">
+    <%= form_with model: @admin, url: admin_account_path, method: :put, local: true do |f| %>
+      
+      <div style="margin-bottom:16px;">
+        <%= f.label :current_password, "Current Password", style: "display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;" %>
+        <%= f.password_field :current_password, class: "adm-input", style: "width:100%;" %>
+        <p style="font-size:11px;color:#9ca3af;margin-top:4px;">We need your current password to confirm your changes</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <%= f.label :password, "New Password", style: "display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;" %>
+        <%= f.password_field :password, class: "adm-input", style: "width:100%;" %>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <%= f.label :password_confirmation, "Confirm New Password", style: "display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;" %>
+        <%= f.password_field :password_confirmation, class: "adm-input", style: "width:100%;" %>
+      </div>
+
+      <%= f.submit "Change Password", class: "adm-btn adm-btn--green" %>
+    <% end %>
+  </div>
+</div>

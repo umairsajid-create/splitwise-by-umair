@@ -11,7 +11,17 @@ class ApplicationController < ActionController::Base
 
   # sign in, sign up go to dashboard
   def after_sign_in_path_for(resource)
-    stored_location_for(resource) || root_path
+    if resource.is_a?(Hash) || !resource.respond_to?(:class)
+      # If session is corrupted with a Hash, clear it
+      sign_out_all_scopes
+      return root_path
+    end
+
+    if resource.is_a?(AdminUser)
+      stored_location_for(resource) || admin_root_path
+    else
+      stored_location_for(resource) || root_path
+    end
   end
 
   def after_sign_up_path_for(resource)
@@ -20,7 +30,11 @@ class ApplicationController < ActionController::Base
 
   # sign out go to login page
   def after_sign_out_path_for(resource_or_scope)
-    new_user_session_path
+    if resource_or_scope == :admin_user || resource_or_scope.is_a?(AdminUser)
+      new_admin_user_session_path
+    else
+      new_user_session_path
+    end
   end
 
   # ability

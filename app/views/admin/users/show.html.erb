@@ -1,0 +1,80 @@
+<% content_for :page_title, @user.username %>
+
+<div style="margin-bottom:16px;">
+  <%= link_to "← Users", admin_users_path, class: "adm-btn adm-btn--ghost" %>
+</div>
+
+<div class="adm-page-header">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div class="adm-avatar" style="width:48px;height:48px;font-size:20px;"><%= @user.username.first.upcase %></div>
+    <div>
+      <h1><%= @user.username %></h1>
+      <p><%= @user.email %> &nbsp;•&nbsp;
+        <span class="adm-badge <%= @user.premium? ? 'adm-badge--blue' : 'adm-badge--gray' %>"><%= @user.role.capitalize %></span>
+        <% if @user.blocked? %> <span class="adm-badge adm-badge--red">Blocked</span> <% end %>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Quick stats -->
+<div class="adm-stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+  <div class="adm-stat">
+    <div class="adm-stat__label">Groups</div>
+    <div class="adm-stat__value"><%= @groups.count %></div>
+  </div>
+  <div class="adm-stat">
+    <div class="adm-stat__label">Expenses Created</div>
+    <div class="adm-stat__value"><%= @expense_count %></div>
+  </div>
+  <div class="adm-stat adm-stat--green">
+    <div class="adm-stat__label">Total Spent</div>
+    <div class="adm-stat__value">$<%= number_with_delimiter(@total_spent.round(2)) %></div>
+  </div>
+</div>
+
+<!-- Groups -->
+<div class="adm-card">
+  <div class="adm-card__header"><span class="adm-card__title">Groups</span></div>
+  <div class="adm-card__body">
+    <% if @groups.any? %>
+      <table class="adm-table">
+        <thead><tr><th>Group</th><th>Type</th><th>Members</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% @groups.each do |group| %>
+            <tr>
+              <td style="font-weight:600;"><%= group.name %></td>
+              <td><span class="adm-badge adm-badge--gray"><%= group.group_type.capitalize %></span></td>
+              <td><%= group.group_members.count %></td>
+              <td>
+                <% if group.is_active %>
+                  <span class="adm-badge adm-badge--green">Active</span>
+                <% else %>
+                  <span class="adm-badge adm-badge--gray">Archived</span>
+                <% end %>
+              </td>
+              <td><%= link_to "View", admin_group_path(group), class: "adm-btn adm-btn--ghost" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="adm-empty"><div class="adm-empty__icon">🏠</div>No groups found.</div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Actions -->
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+  <% if @user.blocked? %>
+    <%= button_to "Unblock User", unblock_admin_user_path(@user), method: :patch, class: "adm-btn adm-btn--green", data: { turbo: false } %>
+  <% else %>
+    <%= button_to "Block User", block_admin_user_path(@user), method: :patch, class: "adm-btn adm-btn--red", data: { turbo: false, turbo_confirm: "Block #{@user.username}?" } %>
+  <% end %>
+  <% unless @user.premium? %>
+    <%= button_to "Promote to Premium", promote_admin_user_path(@user), method: :patch, class: "adm-btn adm-btn--outline", data: { turbo: false } %>
+  <% else %>
+    <%= button_to "Demote to Simple", demote_admin_user_path(@user), method: :patch, class: "adm-btn adm-btn--ghost", data: { turbo: false } %>
+  <% end %>
+  <%= button_to "Send Password Reset", reset_password_admin_user_path(@user), method: :post, class: "adm-btn adm-btn--ghost", data: { turbo: false } %>
+</div>
