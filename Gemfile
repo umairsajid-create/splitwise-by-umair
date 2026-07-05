@@ -101,3 +101,7 @@ gem "dotenv-rails", "~> 3.2"
 
 # SendGrid email delivery via Web API v3
 gem "sendgrid-actionmailer", "~> 3.2"
+
+gem "pagy", "~> 43.5"
+
+gem "kaminari", "~> 1.2"

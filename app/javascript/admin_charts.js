@@ -18,7 +18,7 @@ function maxValue(data) {
 
 function buildChart(canvasId, datasetLabel, data, colors) {
   const canvas = document.getElementById(canvasId);
-  const root = document.querySelector(".admin-charts");
+  const root = document.querySelector(".adm-charts-grid");
   if (!canvas || !root || !window.Chart) return null;
 
   const labels = JSON.parse(root.dataset.labels || "[]");
@@ -73,7 +73,7 @@ function buildChart(canvasId, datasetLabel, data, colors) {
 }
 
 function initAdminCharts() {
-  const root = document.querySelector(".admin-charts");
+  const root = document.querySelector(".adm-charts-grid");
   if (!root || !window.Chart) return;
 
   destroyAdminCharts();
@@ -105,6 +105,9 @@ function loadChartJs() {
   document.head.appendChild(script);
 }
 
+// In ES modules, DOMContentLoaded may have already fired by the time this runs.
+// Execute immediately for the first load.
+loadChartJs();
+
 document.addEventListener("turbo:load", loadChartJs);
 document.addEventListener("turbo:before-cache", destroyAdminCharts);
-document.addEventListener("DOMContentLoaded", loadChartJs);

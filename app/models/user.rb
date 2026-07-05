@@ -31,7 +31,6 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :default_splits, dependent: :destroy
 
-  # Validations
   validates :username, presence: true, uniqueness: { case_sensitive: false }, length: { minimum: 3, maximum: 30 }
   validates :phone_number, length: { maximum: 20 }, allow_blank: true
   validates :role, presence: true

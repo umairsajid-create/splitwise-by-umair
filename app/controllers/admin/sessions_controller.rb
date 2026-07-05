@@ -4,6 +4,11 @@ module Admin
   class SessionsController < Devise::SessionsController
     layout "admin"
 
+    # Devise::SessionsController inherits from ApplicationController which
+    # has `before_action :authenticate_user!`. Skip it so the admin login
+    # page is publicly accessible without being redirected to /users/sign_in.
+    skip_before_action :authenticate_user!, raise: false
+
     def create
       # Extract params explicitly to bypass any Devise/Warden params mapping bugs
       email = params.dig(:admin_user, :email)

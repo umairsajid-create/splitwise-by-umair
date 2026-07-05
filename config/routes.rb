@@ -3,12 +3,12 @@
 require "sidekiq/web"
 
 Rails.application.routes.draw do
-  # ── User Auth
+  # User Auth
   devise_for :users, controllers: {
     registrations: "users/registrations"
   }
 
-  # ── Admin Auth
+  # Admin Auth
   devise_for :admin_users, path: "admin", path_names: {
     sign_in:  "sign_in",
     sign_out: "sign_out"
@@ -40,8 +40,7 @@ Rails.application.routes.draw do
 
   resource :profile, only: [ :show, :edit, :update ]
 
-  # ── Admin Panel ─────────────────────────────────────────────────────
-  # All routes under /admin — all controllers inherit Admin::BaseController
+  # Admin Panel
   namespace :admin do
     root to: "analytics#index"
     get "analytics", to: "analytics#index"

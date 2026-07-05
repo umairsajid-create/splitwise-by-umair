@@ -9,7 +9,6 @@ class SettlementsController < ApplicationController
   def new
     @balances = Groups::BalanceService.new(@group).call
 
-
     @members = @group.members.where.not(id: current_user.id)
   end
 
