@@ -75,7 +75,7 @@
     <% end %>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function() {
+      (function() {
         const select = document.getElementById("receiver-select");
         const avatar = document.getElementById("receiver-avatar");
         const name = document.getElementById("receiver-name");
@@ -121,7 +121,7 @@
             }
           });
         }
-      });
+      })();
     </script>
   <% end %>
 </div>
