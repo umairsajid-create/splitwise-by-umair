@@ -1563,7 +1563,7 @@ textarea.form-control {
 /* Save button bar */
 .ef-save-bar { 
   display: block;
-  padding: var(--space-md) var(--ef-side-pad, 20px);
+  padding: var(--space-md) var(--ef-side-pad, 20px) 80px var(--ef-side-pad, 20px);
   margin-top: var(--space-md);
 }
 .ef-save-btn {
