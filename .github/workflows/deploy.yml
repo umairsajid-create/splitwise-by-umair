@@ -20,7 +20,10 @@ jobs:
             cd ~/app
             git fetch origin
             git reset --hard origin/develop-phase-2
-            source ~/.bashrc
+            # Handle non-interactive shell missing paths for common ruby managers
+            export PATH="$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.asdf/shims:$HOME/.asdf/bin:$PATH"
+            if [ -s "$HOME/.rvm/scripts/rvm" ]; then source "$HOME/.rvm/scripts/rvm"; fi
+            
             bundle install
             RAILS_ENV=production bundle exec rails db:migrate
             RAILS_ENV=production bundle exec rails assets:clean
