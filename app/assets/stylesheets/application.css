@@ -1560,17 +1560,28 @@ textarea.form-control {
   color: var(--text-muted);
 }
 
-/* Save button bar (mobile) */
-.ef-save-bar { display: none; } /* hidden — uses top bar label instead */
+/* Save button bar */
+.ef-save-bar { 
+  display: block;
+  padding: var(--space-md) var(--ef-side-pad, 20px);
+  margin-top: var(--space-md);
+}
 .ef-save-btn {
+  width: 100%;
   background: var(--color-primary);
   color: white;
   border: none;
   border-radius: var(--border-radius-md);
-  padding: var(--space-md) var(--space-xl);
+  padding: 14px var(--space-xl);
   font-weight: 700;
   font-size: var(--font-size-md);
   cursor: pointer;
+  transition: opacity 0.2s;
+  display: block;
+  text-align: center;
+}
+.ef-save-btn:hover {
+  opacity: 0.9;
 }
 
 /* ── SPLIT MODAL ─────────────────────────────────────────── */

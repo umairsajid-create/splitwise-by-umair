@@ -12,9 +12,15 @@ module Expenses
     def call
       raise StandardError, "Your account has been blocked." if @creator.blocked?
 
-        expense = @group.expenses.build(
+      expense = @group.expenses.build(
         @params.merge(created_by: @creator)
       )
+
+      total_owed = @split_data.sum { |s| s[:owed_amount_cents].to_i }
+      unless (total_owed - expense.total_amount_cents.to_i).abs <= 1
+        expense.errors.add(:base, "Splits must add up to the total amount.")
+        return expense
+      end
 
       if expense.is_multi_payer?
         expense.payer_ids  = @payer_data.keys

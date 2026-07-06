@@ -133,7 +133,9 @@
             <div class="list-item__body">
               <div class="list-item__title"><%= expense.title %></div>
               <div class="list-item__subtitle">
-                <% if expense.paid_by.present? %>
+                <% if expense.is_multi_payer? %>
+                  <strong>Multiple people</strong> paid
+                <% elsif expense.paid_by.present? %>
                   <strong><%= expense.paid_by == current_user ? "You" : expense.paid_by.username %></strong> paid
                 <% end %>
                 · <%= expense.expense_date.strftime("%b %d") %>
@@ -147,12 +149,21 @@
                       unit: expense.currency + " ", precision: 2) %>
               </div>
               <% if my_split %>
-                <% if expense.paid_by_id == current_user.id %>
-                  <div class="text-xs" style="color: var(--color-positive);">you paid</div>
-                <% elsif my_split.owed_amount_cents > 0 %>
-                  <div class="text-xs" style="color: var(--color-negative);">
-                    you owe <%= number_to_currency(my_split.owed_amount_cents / 100.0, unit: expense.currency + " ", precision: 2) %>
+                <% net_cents = my_split.paid_amount_cents - my_split.owed_amount_cents %>
+                <% if net_cents > 0 %>
+                  <div class="text-xs" style="color: var(--color-positive);">
+                    you lent <%= number_to_currency(net_cents / 100.0, unit: expense.currency + " ", precision: 2) %>
                   </div>
+                <% elsif net_cents < 0 %>
+                  <div class="text-xs" style="color: var(--color-negative);">
+                    you owe <%= number_to_currency(net_cents.abs / 100.0, unit: expense.currency + " ", precision: 2) %>
+                  </div>
+                <% else %>
+                  <% if my_split.paid_amount_cents == expense.total_amount_cents && expense.total_amount_cents > 0 %>
+                    <div class="text-xs" style="color: var(--color-positive);">you paid</div>
+                  <% elsif my_split.paid_amount_cents == 0 && my_split.owed_amount_cents == 0 %>
+                    <div class="text-xs text-muted">not involved</div>
+                  <% end %>
                 <% end %>
               <% end %>
             </div>

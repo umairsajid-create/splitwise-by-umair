@@ -8,6 +8,7 @@
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= yield :head %>
     <style>
       /* ═══════════════════════════════════════════════════
          ADMIN PANEL — STANDALONE STYLES
@@ -204,10 +205,19 @@
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         padding: 20px;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+      }
+      a.adm-stat:hover {
+        border-color: var(--adm-green);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-1px);
       }
       .adm-stat__label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--adm-muted); margin-bottom: 8px; }
       .adm-stat__value { font-size: 28px; font-weight: 800; color: #111; letter-spacing: -0.5px; }
-      .adm-stat__sub   { font-size: 12px; color: var(--adm-muted); margin-top: 4px; }
+      .adm-stat__sub   { font-size: 12px; color: var(--adm-muted); margin-top: 4px; display: flex; align-items: center; justify-content: space-between; }
       .adm-stat--green .adm-stat__value { color: var(--adm-green); }
       .adm-stat--red   .adm-stat__value { color: var(--adm-red); }
 
@@ -298,7 +308,17 @@
         background: #fff;
       }
       .adm-input:focus { border-color: var(--adm-green); box-shadow: 0 0 0 2px rgba(22,163,74,0.1); }
-      .adm-select { padding: 7px 28px 7px 12px; font-size: 13.5px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer; }
+      .adm-select { 
+        padding: 7px 32px 7px 12px; 
+        font-size: 13.5px; 
+        border: 1px solid #d1d5db; 
+        border-radius: 6px; 
+        background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center;
+        background-size: 14px;
+        appearance: none; 
+        -webkit-appearance: none;
+        cursor: pointer; 
+      }
 
       /* ── Period tab pills ── */
       .adm-period-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
@@ -400,7 +420,6 @@
         <header class="adm-topbar">
           <span class="adm-topbar__title"><%= content_for?(:page_title) ? yield(:page_title) : "Admin Panel" %></span>
           <div class="adm-topbar__actions">
-            <%= link_to "Sidekiq", "/sidekiq", target: "_blank", class: "adm-topbar__btn" %>
             <%= button_to "Sign Out", destroy_admin_user_session_path, method: :delete, class: "adm-topbar__btn adm-topbar__btn--danger" %>
           </div>
         </header>
@@ -416,7 +435,95 @@
           <%= yield %>
         </main>
       </div>
-
     </div>
+
+    <!-- Custom Admin Confirmation Modal -->
+    <div id="adm-confirm-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+      <div style="background:#fff; width:400px; max-width:90%; border-radius:12px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.2); animation: adm-pop 0.2s ease-out;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <div style="background:#fee2e2; color:#dc2626; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h3 style="font-size:18px; font-weight:700; color:#111; margin:0;">Please Confirm</h3>
+        </div>
+        <p id="adm-confirm-msg" style="color:#4b5563; font-size:14px; margin-bottom:24px; line-height:1.5; padding-left:52px;"></p>
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button id="adm-confirm-cancel" class="adm-btn adm-btn--outline" style="min-width:80px;">Cancel</button>
+          <button id="adm-confirm-ok" class="adm-btn adm-btn--red" style="min-width:80px;">Confirm</button>
+        </div>
+      </div>
+    </div>
+    <style>
+      @keyframes adm-pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+
+    <script>
+      (function() {
+        let pendingResolve = null;
+
+        function showConfirm(message) {
+          const modal = document.getElementById('adm-confirm-modal');
+          const msgEl = document.getElementById('adm-confirm-msg');
+          
+          if (!modal || !msgEl) return Promise.resolve(true); // Fallback if modal somehow missing
+          
+          msgEl.textContent = message;
+          modal.style.display = 'flex';
+          
+          return new Promise((resolve) => {
+            pendingResolve = resolve;
+          });
+        }
+
+        function closeConfirm(result) {
+          const modal = document.getElementById('adm-confirm-modal');
+          if (modal) modal.style.display = 'none';
+          if (pendingResolve) {
+            pendingResolve(result);
+            pendingResolve = null;
+          }
+        }
+
+        // Global click listener for modal buttons
+        document.addEventListener('click', (e) => {
+          if (e.target.closest('#adm-confirm-cancel')) {
+            closeConfirm(false);
+          } else if (e.target.closest('#adm-confirm-ok')) {
+            closeConfirm(true);
+          }
+        });
+
+        // Set up Turbo's native confirm if it exists
+        document.addEventListener('turbo:load', () => {
+          if (window.Turbo && Turbo.setConfirmMethod) {
+            Turbo.setConfirmMethod((message, element) => {
+              return showConfirm(message);
+            });
+          }
+        });
+
+        // Fallback for forms with data-turbo="false"
+        document.addEventListener('submit', async (e) => {
+          const form = e.target;
+          
+          const isTurboDisabled = form.getAttribute('data-turbo') === 'false' || 
+                                 (e.submitter && e.submitter.getAttribute('data-turbo') === 'false');
+          
+          const confirmMessage = form.getAttribute('data-turbo-confirm') || 
+                                 (e.submitter && e.submitter.getAttribute('data-turbo-confirm'));
+          
+          // Only intercept if Turbo is bypassed AND it has a turbo_confirm message
+          if (isTurboDisabled && confirmMessage) {
+            e.preventDefault();
+            const result = await showConfirm(confirmMessage);
+            if (result) {
+              form.removeAttribute('data-turbo-confirm');
+              if (e.submitter) e.submitter.removeAttribute('data-turbo-confirm');
+              form.submit();
+            }
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

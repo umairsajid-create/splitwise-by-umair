@@ -13,7 +13,7 @@ class GroupsController < ApplicationController
     @pending_invitations = @group.invitations.active.order(created_at: :desc)
     @expenses = @group.expenses.active
                       .where(record_type: :expense)
-                      .order(expense_date: :desc)
+                      .order(expense_date: :desc, created_at: :desc)
                       .limit(20)
     @balances = Groups::BalanceService.new(@group).call
 

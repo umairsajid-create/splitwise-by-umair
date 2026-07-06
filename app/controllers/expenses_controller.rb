@@ -81,15 +81,10 @@ class ExpensesController < ApplicationController
       # JS calculated splits correctly — use them
       permitted
     else
-      # JS failed — fall back to equal split among all members
-      member_ids = @group.members.pluck(:id)
-      count = member_ids.size
-      share = total_cents / count rescue 0
-      remainder = total_cents - (share * count) rescue 0
-      member_ids.each_with_index.map do |uid, i|
-        amt = share + (i == 0 ? remainder : 0)
-        ActionController::Parameters.new(user_id: uid.to_s, owed_amount_cents: amt.to_s).permit(:user_id, :owed_amount_cents)
-      end
+      # Instead of falling back to all members (which caused the bug), 
+      # we return the empty or zero-sum splits. The CreateService will 
+      # validate that the sum matches total_cents and return an error if it doesn't.
+      permitted
     end
   end
 

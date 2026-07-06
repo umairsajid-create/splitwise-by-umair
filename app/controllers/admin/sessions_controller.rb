@@ -28,6 +28,7 @@ module Admin
         redirect_to admin_root_path, notice: "Signed in successfully."
       else
         # 5. Handle invalid credentials
+        self.resource = AdminUser.new(email: email)
         flash.now[:alert] = "Invalid Email or password."
         render :new, status: :unprocessable_entity
       end

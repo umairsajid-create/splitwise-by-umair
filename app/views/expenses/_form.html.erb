@@ -58,18 +58,17 @@
   <div class="ef-paidby-row">
     <span class="ef-paidby-label">Paid by</span>
 
-    <%# Single payer dropdown — hidden when multi-payer active %>
-    <div class="ef-pill-select" id="ef-singlepayer-wrap">
+    <%# Single payer pill %>
+    <div class="ef-pill-select" id="ef-singlepayer-wrap" style="cursor:pointer;">
       <span class="ef-pill-value" id="ef-paidby-display"><%= current_user.username %></span>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-      <%= f.collection_select :paid_by_id, @members, :id, :username,
-            { selected: current_user.id },
-            class: "ef-pill-native-select", id: "expense_paid_by_id" %>
+      <input type="hidden" name="expense[paid_by_id]" id="expense_paid_by_id" value="<%= current_user.id %>">
     </div>
 
     <%# Partial paid badge — shown when multi-payer active %>
-    <div id="ef-multipayer-badge" style="display:none;">
+    <div id="ef-multipayer-badge" class="ef-pill-select" style="display:none; cursor:pointer;">
       <span class="ef-pill-value" style="color: var(--color-primary); font-size:12px;" id="ef-multipayer-summary">Multiple payers</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
 
     <span class="ef-paidby-label">and split</span>
@@ -78,14 +77,6 @@
       <span class="ef-pill-value" id="ef-split-mode-label">equally</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-
-    <%# Toggle button — at the end so it doesn't push split trigger off screen %>
-    <button type="button" id="ef-partial-trigger"
-            style="font-size:11px; font-weight:600; color:var(--color-primary);
-                   background:none; border:1px solid var(--color-primary); border-radius:20px;
-                   padding:3px 10px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
-      + Partial paid
-    </button>
   </div>
 
 
@@ -140,7 +131,7 @@
 
       <div class="ef-split-modal__header">
         <button type="button" class="ef-split-close" id="ef-partial-cancel">Cancel</button>
-        <h3 class="ef-split-modal__title">Who paid?</h3>
+        <h3 class="ef-split-modal__title">Enter amounts</h3>
         <button type="button" class="ef-split-done" id="ef-partial-done" disabled
                 style="opacity:0.4;">Done</button>
       </div>
@@ -253,6 +244,37 @@
     </div>
   </div>
 
+  <%# ── PAYER MODAL ───────────────────────────────────────── %>
+  <div class="ef-split-modal" id="ef-payer-modal" style="display:none;">
+    <div class="ef-split-modal__inner" style="max-height:80vh; overflow-y:auto;">
+      <div class="ef-split-modal__header" style="justify-content:flex-start; gap:var(--space-md);">
+        <button type="button" class="ef-split-close" id="ef-payer-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h3 class="ef-split-modal__title" style="margin:0;">Who paid?</h3>
+      </div>
+
+      <div class="ef-split-members" style="padding-top:var(--space-md);">
+        <% @members.each do |member| %>
+          <div class="ef-split-member payer-option" style="cursor:pointer;"
+               data-id="<%= member.id %>" data-name="<%= member.username %>">
+            <div class="avatar avatar--md avatar--teal"><%= member.username.first.upcase %></div>
+            <div class="ef-split-member__info">
+              <span class="ef-split-member__name"><%= member.username %></span>
+            </div>
+          </div>
+        <% end %>
+        
+        <div class="ef-split-member payer-multiple-option" style="cursor:pointer; border-top: 1px solid var(--border-color); margin-top: var(--space-sm); padding-top: var(--space-md);">
+          <div class="avatar avatar--md" style="background: var(--color-primary); color: white;">+</div>
+          <div class="ef-split-member__info">
+            <span class="ef-split-member__name" style="font-weight: bold; color: var(--color-primary);">Multiple people</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <%# ── CATEGORY MODAL ────────────────────────────────────── %>
   <div class="ef-split-modal" id="ef-category-modal" style="display:none;">
     <div class="ef-split-modal__inner" style="max-height:80vh; overflow-y:auto;">
@@ -335,9 +357,45 @@
     const splitRows = document.querySelectorAll(".js-split-row");
 
     // --- PAID BY ---
-    if (paidBySelect) {
-      paidBySelect.addEventListener("change", (e) => {
-        paidByDisplay.textContent = e.target.options[e.target.selectedIndex].text;
+    const payerModal = document.getElementById("ef-payer-modal");
+    const payerClose = document.getElementById("ef-payer-close");
+    const singlePayerWrap = document.getElementById("ef-singlepayer-wrap");
+    const multiPayerBadge = document.getElementById("ef-multipayer-badge");
+    const isMultiPayerField = document.getElementById("expense_is_multi_payer");
+    let multiPayerActive = false;
+    
+    if (singlePayerWrap) {
+      singlePayerWrap.addEventListener("click", () => payerModal.style.display = "flex");
+    }
+    if (multiPayerBadge) {
+      multiPayerBadge.addEventListener("click", () => payerModal.style.display = "flex");
+    }
+    if (payerClose) {
+      payerClose.addEventListener("click", () => payerModal.style.display = "none");
+    }
+
+    document.querySelectorAll(".payer-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        paidBySelect.value = opt.dataset.id;
+        paidByDisplay.textContent = opt.dataset.name;
+        
+        multiPayerActive = false;
+        isMultiPayerField.value = "false";
+        singlePayerWrap.style.display = "inline-flex";
+        multiPayerBadge.style.display = "none";
+        
+        payerModal.style.display = "none";
+      });
+    });
+
+    const payerMultiOption = document.querySelector(".payer-multiple-option");
+    if (payerMultiOption) {
+      payerMultiOption.addEventListener("click", () => {
+        payerModal.style.display = "none";
+        const totalRaw = parseFloat(totalInput.value) || 0;
+        document.getElementById("ef-partial-total").textContent = "PKR " + totalRaw.toFixed(2);
+        updatePartialRemaining();
+        document.getElementById("ef-partial-modal").style.display = "flex";
       });
     }
 
@@ -509,6 +567,15 @@
         return;
       }
 
+      if (splitMode === "equal") {
+        const activeChecks = document.querySelectorAll(".equal-check.active");
+        if (activeChecks.length === 0) {
+          e.preventDefault();
+          alert("Please select at least one person to split the expense with.");
+          return;
+        }
+      }
+
       if (splitMode !== "equal") {
         let sumCents = 0;
         document.querySelectorAll(".split-cents-hidden").forEach(input => {
@@ -524,36 +591,21 @@
           return;
         }
       }
+      
+      // Payer validation is handled by the multi-payer extension below
     });
 
     // Initial calculation run
     calculateSplits();
 
     // ─── PARTIAL PAYER MODAL ─────────────────────────────────────────
-    const partialTrigger  = document.getElementById("ef-partial-trigger");
     const partialModal    = document.getElementById("ef-partial-modal");
     const partialCancel   = document.getElementById("ef-partial-cancel");
     const partialDone     = document.getElementById("ef-partial-done");
     const partialInputs   = document.querySelectorAll(".partial-paid-input");
     const remainingEl     = document.getElementById("ef-partial-remaining");
     const partialTotalEl  = document.getElementById("ef-partial-total");
-    const isMultiPayerField = document.getElementById("expense_is_multi_payer");
-    const singlePayerWrap = document.getElementById("ef-singlepayer-wrap");
-    const multiPayerBadge = document.getElementById("ef-multipayer-badge");
     const multiPayerSummary = document.getElementById("ef-multipayer-summary");
-
-    let multiPayerActive = false;
-
-    // Open partial modal
-    if (partialTrigger) {
-      partialTrigger.addEventListener("click", () => {
-        // Sync total display in modal
-        const totalRaw = parseFloat(totalInput.value) || 0;
-        partialTotalEl.textContent = "PKR " + totalRaw.toFixed(2);
-        updatePartialRemaining();
-        partialModal.style.display = "flex";
-      });
-    }
 
     // Cancel: close and reset to single payer if not confirmed yet
     if (partialCancel) {
@@ -583,9 +635,7 @@
 
         // Hide single payer dropdown, show badge
         singlePayerWrap.style.display = "none";
-        if (paidBySelect) paidBySelect.removeAttribute("required");
         multiPayerBadge.style.display = "inline-flex";
-        partialTrigger.textContent = "✎ Edit payers";
 
         // Build summary text: "Ali + Sara paid"
         const names = [];
@@ -630,15 +680,28 @@
     if (totalInput) totalInput.addEventListener("input", updatePartialRemaining);
 
     // Extend form submit validation for multi-payer
-    const existingSubmitListeners = form.cloneNode(false);
     form.addEventListener("submit", (e) => {
-      if (!multiPayerActive) return; // single payer handled above
+      if (e.defaultPrevented) return; // Already failed validation above
+
+      if (!multiPayerActive) {
+        if (!paidBySelect.value) {
+          e.preventDefault();
+          alert("Please select who paid the expense.");
+        }
+        return; 
+      }
 
       const totalCents = Math.round((parseFloat(totalInput.value) || 0) * 100);
       let sumPaid = 0;
       document.querySelectorAll(".partial-cents-hidden").forEach(h => {
         sumPaid += parseInt(h.value) || 0;
       });
+
+      if (sumPaid === 0) {
+        e.preventDefault();
+        alert("Please specify who paid for the expense.");
+        return;
+      }
 
       if (Math.abs(sumPaid - totalCents) > 1) {
         e.preventDefault();

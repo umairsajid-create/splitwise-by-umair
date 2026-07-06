@@ -7,31 +7,35 @@
 
 <!-- KPI Cards -->
 <div class="adm-stats-grid">
-  <div class="adm-stat">
+  <%= link_to admin_users_path, class: "adm-stat" do %>
     <div class="adm-stat__label">Total Users</div>
     <div class="adm-stat__value"><%= @analytics[:totals][:users] %></div>
-    <div class="adm-stat__sub">Registered accounts</div>
-  </div>
-  <div class="adm-stat adm-stat--green">
+    <div class="adm-stat__sub">Registered accounts <span>→</span></div>
+  <% end %>
+
+  <%= link_to admin_groups_path, class: "adm-stat adm-stat--green" do %>
     <div class="adm-stat__label">Total Groups</div>
     <div class="adm-stat__value"><%= @analytics[:totals][:groups] %></div>
-    <div class="adm-stat__sub">Active groups</div>
-  </div>
-  <div class="adm-stat">
+    <div class="adm-stat__sub">Active groups <span>→</span></div>
+  <% end %>
+
+  <%= link_to admin_expenses_path, class: "adm-stat" do %>
     <div class="adm-stat__label">Expenses & Settlements</div>
     <div class="adm-stat__value"><%= @analytics[:totals][:activities] %></div>
-    <div class="adm-stat__sub">Active records</div>
-  </div>
-  <div class="adm-stat adm-stat--red">
+    <div class="adm-stat__sub">Active records <span>→</span></div>
+  <% end %>
+
+  <%= link_to admin_users_path(blocked: true), class: "adm-stat adm-stat--red" do %>
     <div class="adm-stat__label">Blocked Users</div>
     <div class="adm-stat__value"><%= @nav_blocked_count %></div>
-    <div class="adm-stat__sub"><%= link_to "Manage →", admin_users_path(blocked: true), style: "color:inherit;" %></div>
-  </div>
-  <div class="adm-stat">
+    <div class="adm-stat__sub">Manage blocked <span>→</span></div>
+  <% end %>
+
+  <%= link_to admin_invitations_path(status: "pending"), class: "adm-stat" do %>
     <div class="adm-stat__label">Pending Invitations</div>
     <div class="adm-stat__value"><%= @nav_pending_invites %></div>
-    <div class="adm-stat__sub"><%= link_to "View →", admin_invitations_path(status: "pending"), style: "color:inherit;" %></div>
-  </div>
+    <div class="adm-stat__sub">View pending <span>→</span></div>
+  <% end %>
 </div>
 
 <!-- Period Tabs -->
