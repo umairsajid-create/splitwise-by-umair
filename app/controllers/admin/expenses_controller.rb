@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class ExpensesController < BaseController
+  class ExpensesController < AdminController
     def index
       @expenses = Expense.includes(:group, :created_by, :category)
                          .active_records

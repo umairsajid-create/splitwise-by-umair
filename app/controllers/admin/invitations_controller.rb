@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class InvitationsController < BaseController
+  class InvitationsController < AdminController
     before_action :set_invitation, only: [:expire]
 
     def index

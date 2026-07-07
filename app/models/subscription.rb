@@ -13,6 +13,7 @@ class Subscription < ApplicationRecord
   validates :starts_at, presence: true
   validates :ends_at, presence: true
   validate :ends_at_after_starts_at
+  validates :transaction_id, presence: true, uniqueness: true, format: { with: /\A\d{9}\z/, message: "must be exactly 9 digits" }
 
   scope :currently_active, -> { active.where("ends_at > ?", Time.current) }
   scope :expired_unchecked, -> { active.where("ends_at <= ?", Time.current) }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class ActivityController < BaseController
+  class ActivityController < AdminController
     def index
       @query = params[:q].to_s.strip
       @can_use_elasticsearch = true # Admins can always search globally

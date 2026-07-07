@@ -29,6 +29,7 @@ class User < ApplicationRecord
 
   # Subscriptions
   has_many :subscriptions, dependent: :destroy
+  accepts_nested_attributes_for :subscriptions
   has_many :default_splits, dependent: :destroy
 
   validates :username, presence: true, uniqueness: { case_sensitive: false }, length: { minimum: 3, maximum: 30 }

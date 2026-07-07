@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class AccountController < BaseController
+  class AccountController < AdminController
     def show
       @admin = current_admin_user
     end

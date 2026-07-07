@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class GroupsController < BaseController
+  class GroupsController < AdminController
     before_action :set_group, only: [:show, :archive, :restore]
 
     def index

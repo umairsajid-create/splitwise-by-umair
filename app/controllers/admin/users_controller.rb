@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class UsersController < BaseController
+  class UsersController < AdminController
     before_action :set_user, only: [:show, :block, :unblock, :promote, :demote, :reset_password]
 
     def index
@@ -30,13 +30,13 @@ module Admin
     end
 
     def promote
-      @user.update!(role: :premium)
-      redirect_to admin_users_path, notice: "#{@user.username} promoted to Premium."
+      redirect_to new_admin_user_payment_path(@user)
     end
 
     def demote
+      @user.active_subscription&.cancel!
       @user.update!(role: :simple)
-      redirect_to admin_users_path, notice: "#{@user.username} demoted to Simple."
+      redirect_to admin_users_path, notice: "#{@user.username} demoted to Simple and subscription cancelled."
     end
 
     def reset_password

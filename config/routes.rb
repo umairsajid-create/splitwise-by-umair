@@ -54,6 +54,7 @@ Rails.application.routes.draw do
         patch :demote
         post  :reset_password
       end
+      resources :payments, only: [ :new, :create ], module: :users
     end
 
     # Groups
