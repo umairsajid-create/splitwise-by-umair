@@ -49,14 +49,14 @@ class User < ApplicationRecord
   end
 
   def can_create_expense_today?
-    return true if daily_expense_limit.zero?
+    return true if premium?
 
     today_count = created_expenses.expense.where("DATE(created_at) = ?", Date.current).count
     today_count < daily_expense_limit
   end
 
   def can_create_settlement_today?
-    return true if daily_settlement_limit.zero?
+    return true if premium?
 
     today_count = created_expenses.settlement.where("DATE(created_at) = ?", Date.current).count
     today_count < daily_settlement_limit

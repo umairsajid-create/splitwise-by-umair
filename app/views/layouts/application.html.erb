@@ -55,6 +55,11 @@
         <% end %>
 
       </div>
+      
+      <%# Global Limit Reached Modal %>
+      <% if user_signed_in? %>
+        <%= render "shared/limit_reached_modal" %>
+      <% end %>
     </div>
   </body>
 </html>

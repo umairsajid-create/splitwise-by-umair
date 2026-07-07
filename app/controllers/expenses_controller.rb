@@ -6,6 +6,7 @@ class ExpensesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_group
   before_action :set_expense, only: [ :show, :destroy ]
+  before_action :check_expense_limit, only: [ :new, :create ]
 
   def new
     @expense = Expense.new(expense_date: Date.today)
@@ -59,6 +60,12 @@ class ExpensesController < ApplicationController
 
   def set_expense
     @expense = @group.expenses.find(params[:id])
+  end
+
+  def check_expense_limit
+    unless current_user.can_create_expense_today?
+      redirect_to @group || groups_path, alert: "Daily expense limit reached. Upgrade to Premium for unlimited!"
+    end
   end
 
   def expense_params

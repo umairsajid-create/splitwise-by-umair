@@ -5,6 +5,7 @@ class SettlementsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :set_group
+  before_action :check_settlement_limit, only: [ :new, :create ]
 
   def new
     @balances = Groups::BalanceService.new(@group).call
@@ -33,5 +34,11 @@ class SettlementsController < ApplicationController
 
   def set_group
     @group = current_user.groups.find(params[:group_id])
+  end
+
+  def check_settlement_limit
+    unless current_user.can_create_settlement_today?
+      redirect_to @group || groups_path, alert: "Daily settlement limit reached. Upgrade to Premium for unlimited!"
+    end
   end
 end
