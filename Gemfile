@@ -11,7 +11,7 @@ gem "pg", "~> 1.5"
 gem "sidekiq", "~> 8.0"
 
 # Redis for caching and Sidekiq backend
-gem "redis", "~> 5.3"
+gem "redis", "~> 6.0"
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
